@@ -1,9 +1,11 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse.
 
-# Step 3 base run · attempt a5 · 4 families · rate 5/family · 13:10:00–13:40:00 UTC (RUNNING, not scored yet)
+# Step 3 base run · attempt a5 · 4 families · rate 5/family · 13:20:00–13:50:00 UTC (RUNNING, not scored yet)
 
-Fresh genesis (launch paths `…-s3a5-f1..4`, genesis window from 12:55Z), START 13:10:00Z, END 13:40:00Z, 20 min recovery to ~14:00Z.
+Fresh genesis (launch paths `…-s3a5-f1..4`, at 13:08Z), START 13:20:00Z, END 13:50:00Z, 20 min recovery to ~14:10Z.
 Lane keys topped up from the Grok Bot TN10 wallet to **400 coins of 16 tKAS each** (8 txs, 0.14 tKAS fees) before preflight.
+
+**First try aborted before START (12:54:55Z):** the mini coordinator dropped all 4 families with `FAMILY_DROP reason=no_funding`, because the mini's four *genesis* keys (separate from the desk lane keys) had no coin of 15 tKAS or more left after a4. The handoff push then failed as designed (`http_422_not_handoff`, empty handoff), and the desk guard never let a sender start. Fix: 3 coins of 16 tKAS per genesis key from the Grok Bot wallet (1 tx), both orchestrators stopped and relaunched with genesis at 13:08Z and START at 13:20Z. **For every later run:** preflight must also check that each genesis key has at least 1 coin of 15 tKAS or more.
 
 ## Root cause found for a4's fade after 11:45 and the 81 s family-3 freeze
 From the a4 code (self-source senders):
@@ -34,3 +36,13 @@ Unchanged from a4: lane preflight (DNS, wRPC, synced, coins ≥ 200), detached o
 ## Logs (not in git)
 - desk `C:\Users\<desk-user>\tn10-storm-2026-10-30\step3-a5\{logs\phase.log, logs\proc-*.csv, logs\pool-*.csv, logs\clock-desk.csv, out\*, private\submit-*.jsonl, private\catchup-*.jsonl, private\builder-*.err}`, kit `kit5\`
 - mini `C:\Users\<mini-user>\tn10-storm-2026-10-30\step3-a5\{logs\phase.log, logs\recount.csv, out\*, private\hops.jsonl, private\resync.jsonl}`
+
+## Launch (UTC)
+| Time | Event |
+|---|---|
+| 13:07:59 | fresh genesis on the mini, 4 families, handoff created and pushed |
+| 13:08:02 | desk `HANDOFF seen_on_desk` → `PREFLIGHT exit=0` (all 4 lanes: DNS ok, synced, 400 coins; wRPC desk 21 ms, mini 9, muon 325, boson 107) → guard OK |
+| 13:08:03 | `LAUNCH exit=0`: `broker none (one builder per sender)`, 4 senders, 4 `kcc20` builders |
+| 13:20:00 | START (12 min after everything was ready) |
+
+**Clock warning:** the desk clock was **−119.1 ms** at launch, outside the 100 ms pre-check limit (a4: −88 ms). It is logged, so per-second counts can be corrected, but it fails the pre-check criterion until the one-time admin `w32tm /resync` is done on the desk.
