@@ -46,6 +46,7 @@ Measure: hops/s per family and total; accepted vs attempted per lane; node RPC t
 The 90 % rule cannot be met under designed contention: four senders race for the same covenant outpoint per family, so about three of four submits lose with `already_spent` by design (a2: 20–28 % accepted per lane, zero non-contention rejects). "On every second" was undefined; it is now measured from the submit log and the landed-hop log. See [ATTEMPT-a2](../logs/selftest-2026-10-30/step3-base/ATTEMPT-a2.md). Scored with `tools/storm/score.mjs`.
 
 ## Steps 4–5 · ladder (dated change, Fri 30 Oct 2026: 2× and 4× dropped)
+- **2-hour confirmation** (dated change, Fri 30 Oct 2026, stp): after the first 10/10 base run, repeat the **same setup for 2 hours**; it must also score **10/10** before any scaling (3× rate, 8 families).
 
 Each its own run, same 30 min, same pass criteria, base = Step 3 rate:
 
