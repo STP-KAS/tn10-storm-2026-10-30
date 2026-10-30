@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Running status, updated with each attempt.
 
-# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 RUNNING 17:35–18:05Z**
+# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · paused for desk restart
 
 **[RUNBOOK](RUNBOOK.md)**: every problem a1–a7, how it was solved, and the launch checklist.
 
@@ -37,7 +37,12 @@ a6 (15:00–15:30Z): no freeze. 3 phantom tips, each recovered in ~5.4 s. 843 `U
 
 Testing is paused at stp's request: he is using the desk for gaming and will restart the desk and its node afterwards.
 
-- a7 ran its full window (17:35–18:05 UTC) and recovery; its logs are on disk. It is **not scored yet**; scoring was paused before it ran.
+- a7 ran its full window (17:35–18:05 UTC) and recovery; its logs are on disk. **Scored 10/10 at ~19:50 CET** from logs copied read-only before the restart ([ATTEMPT-a7](logs/selftest-2026-10-30/step3-base/ATTEMPT-a7.md)).
 - No sender, builder or coordinator is running. The 2-hour confirmation run has not started.
 - The desk clock fix (NTP via pool.ntp.org, MaxAllowedPhaseOffset 0) should survive the restart. Re-check it in preflight.
 - Resume order once the desk node is back and synced: score a7, then the 2-hour run if a7 is 10/10, otherwise a8. Top up the mini genesis keys before the next launch (see RUNBOOK).
+
+## a7 scored — 30 Oct 2026, ~19:50 CET
+- **10 / 10**, the first. 9,573 hops (recount) = 5.32 hops/s, 99.28 % landing seconds, 0 non-contention errors, desk clock +5.0 / −1.1 ms, node RPC max 16 ms (desk) / 35 ms (mini), `RECOUNT_OK rows=4`.
+- New open flaws (measurement only): hop log misses 220 hops skipped by coordinator resyncs; `RECOUNT_OK` checks row count, not agreement. Fix both in the next kit.
+- **Next: 2-hour 10/10 confirmation run of the a7 setup.** Not launched; testing is paused until stp says the desk node is back and synced. Before launch: top up mini genesis keys, explicit kit paths.

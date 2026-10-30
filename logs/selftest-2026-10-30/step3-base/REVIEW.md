@@ -171,3 +171,24 @@ The PLAN now reads criterion 7 as node-watch RPC **p95 < 50 ms and max < 250 ms*
 ## Recommendation for a7 (not run)
 Same base (4 families, rate 5, 30 min, fresh genesis, 400 coins per lane, one builder per sender, option (a)). Start only after (1) stp's admin clock fix has held ≤ 80 ms for an hour, (2) the fire-on-new-tip rehearsal passes, (3) the mini bot's hop-log revert marking is in kit6. Pass bar: 10/10. Then the **2-hour confirmation** of the same setup (PLAN, 30 Oct), and only after that 3× rate and 8 families.
 
+
+## a7 against the PLAN criteria (plan 2b: no share rule; RPC p95 < 50 / max < 250 ms; clock gate)
+**Score: 10 / 10**, the first 10/10. 9,573 hops by recount = **5.32 hops/s** (a6 4.30). Landing seconds 99.28 %, 0 non-contention errors on all lanes, desk clock +5.0 / −1.1 ms, node RPC desk p95 14 / max 16 ms and mini 2 / 35 ms, `RECOUNT_OK rows=4`, recovery within 25 s. Shares (reported): desk 16.87 · mini 3.58 · muon 11.79 · boson 67.75 %. Details: [ATTEMPT-a7](ATTEMPT-a7.md).
+
+What made the difference vs a6: the desk clock fix (stp, admin), fire-on-new-tip senders (+24 % throughput), and the plan 2b scoring change (the desk share depends on network position, not on code).
+
+Caveat: the hop log misses 220 hops skipped by coordinator resyncs (recount is the truth), and `RECOUNT_OK` checks rows only. Both are measurement fixes for the next kit; neither changes a criterion.
+
+## a7 vs a6
+| | a6 | a7 |
+|---|---|---|
+| Score | 8/10 | **10/10** |
+| Hops (recount) | 7,732 | **9,573** |
+| Hops/s | 4.30 | **5.32** |
+| Landing seconds | 99.22 % | 99.28 % |
+| Desk clock | −146 ms | +5.0 ms |
+| Desk share | 14.97 % | 16.87 % (reported) |
+| TIP_BACK (coord) | 3 | 3 |
+
+## Recommendation
+Next is the **2-hour 10/10 confirmation** of the a7 setup (stp, 30 Oct 15:56 CET). Top up the mini genesis keys first and launch with explicit kit paths. Waiting for stp to resume after the desk restart.
