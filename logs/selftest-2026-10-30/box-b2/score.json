@@ -1,0 +1,69 @@
+{
+ "window_s": 1200,
+ "hops_landed_in_window": 4101,
+ "attributed": 4101,
+ "land_secs": 1114,
+ "land_secs_pct": 92.83,
+ "lanes": [
+  {
+   "lane": "muon",
+   "att": 21991,
+   "ok": 2181,
+   "cont": 19810,
+   "noncont": 0,
+   "landed": 876,
+   "noncont_pct": 0,
+   "landed_share_pct": 21.4,
+   "landed_share_exact_pct": 21.361,
+   "noncont_pass": true,
+   "every_second_pass": true,
+   "share_rule": "reported_only",
+   "secs_attempting": 1200
+  },
+  {
+   "lane": "muon2",
+   "att": 22041,
+   "ok": 2195,
+   "cont": 19846,
+   "noncont": 0,
+   "landed": 550,
+   "noncont_pct": 0,
+   "landed_share_pct": 13.4,
+   "landed_share_exact_pct": 13.411,
+   "noncont_pass": true,
+   "every_second_pass": true,
+   "share_rule": "reported_only",
+   "secs_attempting": 1200
+  },
+  {
+   "lane": "boson",
+   "att": 21138,
+   "ok": 2016,
+   "cont": 19122,
+   "noncont": 0,
+   "landed": 1259,
+   "noncont_pct": 0,
+   "landed_share_pct": 30.7,
+   "landed_share_exact_pct": 30.7,
+   "noncont_pass": true,
+   "every_second_pass": true,
+   "share_rule": "reported_only",
+   "secs_attempting": 1200
+  },
+  {
+   "lane": "boson2",
+   "att": 21050,
+   "ok": 2261,
+   "cont": 18789,
+   "noncont": 0,
+   "landed": 1416,
+   "noncont_pct": 0,
+   "landed_share_pct": 34.5,
+   "landed_share_exact_pct": 34.528,
+   "noncont_pass": true,
+   "every_second_pass": true,
+   "share_rule": "reported_only",
+   "secs_attempting": 1200
+  }
+ ]
+}

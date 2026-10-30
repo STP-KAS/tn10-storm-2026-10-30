@@ -49,3 +49,6 @@ Testing is paused at stp's request: he is using the desk for gaming and will res
 
 ## b1 scored — 30 Oct 2026, ~21:05 CET
 Box-only senders, mini counts, desk untouched: **6/10**. 6,035 hops (3.35 hops/s), 0 errors / 121,110 attempts, landing 92.0 %, RECOUNT_MATCH (6,038 vs 6,035). Held-awake segment 19:24:30–19:50Z: 3.56 hops/s, 97.65 % landing, every second on all lanes, **no freeze**. Detached keepalive alone did not stop the box suspend. Fails: clock (known), every-second (start lost to suspend), landing. Desk 2-hour confirmation of a7 still pending stp.
+
+## b2 scored — 30 Oct 2026, ~22:30 CET
+Box-only senders, mini counts, 20-min window 21:00–21:20Z **completed**: **7/10**. 4,333 hops (recount) = 3.61 hops/s, 0 errors / 86,220 attempts, every lane 1,200/1,200 s, landing 92.83 %. **0 box freezes** (health max gap 5.03 s, 20:37–21:24Z) even though the agent session holding the box was cut off. Reconnect fix proven in rehearsal (379 ms), not needed in the run. Fails: clock (known), landing and recount (mini kaspad lost all peers 21:03:19–21:04:14; hop log not back-filled after the resync: 4,028 vs 4,333). [ATTEMPT-b2](logs/selftest-2026-10-30/box-b2/ATTEMPT-b2.md)

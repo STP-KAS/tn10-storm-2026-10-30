@@ -70,7 +70,10 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 ## 7. Box as sender host (b1, 30 Oct)
 - **Box suspends when idle, so a box sender needs an active session.** Symptom: health gaps 156 s / 56 s, WebSockets dead, senders `SENDER_OFF`. Fix: an agent keeps foreground commands running (25 s loops checking senders + health) for the whole window; b1 held 19:24:30–19:50 with 0 freezes. Verified: a detached `nohup` keepalive (1 s ticks + HTTPS HEAD) alone still froze (19 s, 45 s gaps) — not a fix.
 - **NTP is blocked on the box** (UDP 123); the HTTPS offset jumps ±0.9 s after suspends. Clock gate on the box = known failure; log it only.
-- Senders must reconnect after `node_dead` (open for b2).
+- **Senders reconnect after `node_dead`** (b2, fixed): wRPC client is rebuilt on 3 failed probes. Verified 30 Oct 20:36Z: killed WebSocket → `RECONNECT_OK` 379 ms → `SENDER_ON`.
+- b2 (21:00–21:20Z): full window, **0 freezes** (health max gap 5.03 s), 0 errors, every lane every second. The agent session ended early but the box did not suspend within the run.
+- **When a session ends early, orchestrators keep running**: after the window, stop `b2-box.sh`, `health.sh` and the clock keeper on the box and the mini orchestrator, node-watch and post-end (never kaspad).
+- **Coordinator resync skips hops in the hop log** (b2: ~57 per family after the mini node lost peers for 55 s). Score #10 against the recount, or back-fill the skipped seqs.
 
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
