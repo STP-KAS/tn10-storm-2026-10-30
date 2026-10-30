@@ -110,7 +110,7 @@ async function attempt1(fam) {
   const ts = iso(); let result = "ok", why = "", err = ""; const t0 = Date.now();
   try { await to(rpc.submitTransaction({ transaction: h.tx, allowOrphan: false }), 8000, "submit"); }
   catch (e) { result = "rejected"; why = reason(e); err = String(e?.message || e).replace(/\s+/g, " ").slice(0, 600); }
-  const row = { ts, sender: LABEL, node: LABEL, family: fam, txid: h.txid, result, reason: why, source: SOURCE, rpc_ms: Date.now() - t0, build_ms, tip_seq: st.seq || 0, catchup_ms: fam$.get(fam)?.catchup_ms ?? 0, q: inflight, bq: B.depth ? B.depth() : 0 }; if (err) row.err = err;
+  const row = { ts, sender: LABEL, node: LABEL, family: fam, txid: h.txid, result, reason: why, source: SOURCE, rpc_ms: Date.now() - t0, build_ms, tip_seq: st.seq || 0, catchup_ms: fam$.get(fam)?.catchup_ms ?? 0, tip_age_ms: st.live_utc ? Date.now() - Date.parse(st.live_utc) : null, fire: FIRING.has(fam) ? 1 : 0, q: inflight, bq: B.depth ? B.depth() : 0 }; if (err) row.err = err;
   LOG.write(JSON.stringify(row) + "\n");
   if (++shapeTry <= 20 && (why === "mass" || why === "fee")) { if (++shapeRej >= 5 && !dropped) { dropped = true; phase(`NODE_DROP node=${LABEL} reason=redeem_shape`); } }
   if (SOURCE === "self" && result !== "ok") markStale(fam, why); // tip moved: single-flight refresh, attempts continue on the cached tip
@@ -118,6 +118,17 @@ async function attempt1(fam) {
   pool.coins = pool.coins.filter((c) => !(c.txid === coin.txid && c.index === coin.index));
 }
 
+// 30 Oct a7: fire on new tip. When a family's tip changes (own catch-up, or a newer tip in the shared state written by
+// another lane), send that family's next attempt AT ONCE instead of waiting for the next tick. The bucket goes to -1
+// so the following tick is dropped: the rate stays at s.rate per family per lane. tip_age_ms per attempt = ms since the tip was seen live.
+const FIRE = CFG.fire_on_tip !== false, tipKey = new Map(), FIRING = new Set();
+function tipChanged(fam) {
+  const f = fam$.get(fam); if (!f) return false;
+  const sh = readState(fam);
+  if (sh && f.st && (sh.seq || 0) > (f.st.seq || 0) && f.suspect !== sh.seq) { remember(f, sh); f.st = { ...sh, live_utc: sh.live_utc || iso() }; f.stale = false; }
+  if (!f.st) return false;
+  const k = `${f.st.seq}:${f.st.txid}`; if (tipKey.get(fam) === k) return false; tipKey.set(fam, k); return true;
+}
 const bucket = new Map(), skipT = new Map(), SKIP_MS = Number(CFG.skip_ms || 250); let last = Date.now();
 while (true) {
   const now = Date.now();
@@ -127,6 +138,7 @@ while (true) {
   for (const f of CFG.families) {
     const fam = f.family;
     if (!on || fam > s.families) { bucket.set(fam, 0); continue; }
+    if (FIRE && SOURCE === "self" && tipChanged(fam) && !busy(fam)) { FIRING.add(fam); attempt(fam).catch(() => {}).finally(() => FIRING.delete(fam)); bucket.set(fam, Math.max(-1, (bucket.get(fam) || 0) - 1)); }
     let b = Math.min((bucket.get(fam) || 0) + s.rate * dt, Math.max(1, s.rate * 0.2));
     if (SOURCE === "self" && busy(fam)) { const t = skipT.get(fam) || now; skipT.set(fam, t); if (now - t < SKIP_MS) { bucket.set(fam, b); continue; } } else skipT.delete(fam);   // at most 250 ms, then attempt on the cached tip
     while (b >= 1) { b -= 1; attempt(fam).catch((e) => { console.error("attempt", e.message); LOG.write(JSON.stringify({ ts: iso(), sender: LABEL, node: LABEL, family: fam, txid: "", result: "error", reason: "pre_submit", err: String(e?.message || e).replace(/[0-9a-f]{64}/g, "<h>").slice(0, 200) }) + "\n"); }); }   // 30 Oct a3: count pre-submit errors

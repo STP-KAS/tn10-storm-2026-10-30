@@ -1,6 +1,8 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Running status, updated with each attempt.
 
-# Status · 30 Oct 2026 · a6 scored 8/10 · a7 planned, not started
+# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · a7 rehearsal FAIL (desk share 13.19 %) · a7 not started
+
+**[RUNBOOK](RUNBOOK.md)**: every problem a1–a7, how it was solved, and the launch checklist.
 
 | Attempt | Score | hops/s | Main flaw |
 |---|---|---|---|
@@ -11,7 +13,8 @@
 a6 (15:00–15:30Z): no freeze. 3 phantom tips, each recovered in ~5.4 s. 843 `UNACCEPT`, 0 `STALL`. Landing seconds 99.22 %, node RPC p95 4 / 2 ms. `RECOUNT_OK rows=4` (7,732 vs hop log 7,734). [ATTEMPT-a6](logs/selftest-2026-10-30/step3-base/ATTEMPT-a6.md) · [REVIEW](logs/selftest-2026-10-30/step3-base/REVIEW.md)
 
 ## Open flaws and issues
-- **Desk clock** −146.3 ms at a6 preflight, −154.0 ms after END, −157.2 ms at 16:00Z. w32time "syncs" with time.nist.gov but does not correct the offset. The fix needs admin on the desk (the agent session is not elevated). **Criterion 1 fails until stp runs the one-time admin fix** (commands in ATTEMPT-a6, a7 plan #1).
+- **Desk lane share (blocking a7).** a7 rehearsal 16:55–17:05Z ([REHEARSAL-a7](logs/selftest-2026-10-30/step3-base/REHEARSAL-a7.md)): fire-on-new-tip makes the desk fire first (tip age p50 221 ms) and its node accepts as many submits as boson's, but only 13 % of them land vs 76 % for boson. Share **13.191 %** (< 17 % gate). The winner is set after submit by propagation to the miners, so code cannot fix it. **stp's decision (plan 2b)**: score the desk lane like the others, or keep the rule.
+- ~~**Desk clock** −146.3 ms at a6 preflight, −154.0 ms after END, −157.2 ms at 16:00Z. w32time "syncs" with time.nist.gov but does not correct the offset. The fix needs admin on the desk (the agent session is not elevated). ~~ **FIXED 30 Oct 2026, 16:45–16:47Z by stp (admin)**: NTP peer `pool.ntp.org,0x8`, manual sync, SpecialPollInterval 900, **MaxAllowedPhaseOffset 0** (the key step: Windows only steps the clock above 300 s by default), restart w32time, resync /force. Readings: −0.162 s at 16:46Z (before MaxAllowedPhaseOffset), **+0.0008 / +0.0004 / +0.0004 s at 16:47:50Z**, rehearsal preflight +2.0 ms at 16:54Z. a7 config: `clock_gate: fail`. Commands in [RUNBOOK](RUNBOOK.md) 6.5.
 - **Desk lane share** 14.973 % (rule ≥ 15 %). Boson wins 67.7 % of the races, most likely because of its network position. Planned fix: fire-on-new-tip in `sender.mjs` plus `tip_age_ms` logging, rehearsed first. If that does not lift it, the share rule is stp's decision.
 - **The hop log counts reverted hops** (+2 vs the recount in a6). The coordinator fix runs on the mini, so it goes to the mini bot.
 - Guard refusal without a handoff was not shown again in a6 (the relaunch ran the guard after the handoff arrived).
@@ -23,7 +26,8 @@ a6 (15:00–15:30Z): no freeze. 3 phantom tips, each recovered in ~5.4 s. 843 `U
 - After a6: `score.mjs` checks the share rule on the unrounded share (`share_exact_pct`, `share_pass`). a6 showed 15.0 for 14.973 %.
 
 ## Being done / next
-1. **stp:** the admin clock fix on the desk (a7 plan #1). a7 cannot score 10/10 without it.
-2. Desk: fire-on-new-tip + `tip_age_ms`, the guard-refusal pre-check and the pwsh check (`desk-a7.ps1`), then a 10 min rehearsal (pass: desk share ≥ 17 %).
+1. ~~stp: admin clock fix~~ done.
+2. ~~Desk: fire-on-new-tip + `tip_age_ms` (`sender.mjs`), guard-refusal hard pre-check + pwsh 7 check (`desk-a7.ps1`), 10 min rehearsal~~ done: rehearsal FAIL on the share gate (13.19 %).
+2b. **stp:** share rule for the desk lane (see open flaw 1). a7 waits for this.
 3. Mini bot: hop-log revert marking + `seq` in `coordinator.mjs` (kit6).
 4. a7 (same base). After the first 10/10: a **2-hour run of the same setup that must also score 10/10**, then 3× rate, then 8 families.

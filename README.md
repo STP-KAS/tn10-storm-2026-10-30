@@ -36,6 +36,8 @@ Governance and attention shift entirely to the **desk**.
 
 ## Map
 
+**[RUNBOOK](RUNBOOK.md)**: every problem a1–a7, how it was solved, and the launch checklist.
+
 | File | What is in it |
 |---|---|
 | [plan/PLAN.md](plan/PLAN.md) | Steps, pass criteria, ladder (4 fam base · 4 fam 3× · 8 fam base), fixes from 29 Oct |
