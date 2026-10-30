@@ -30,7 +30,7 @@ Each entry: **symptom → cause → fix → how it was verified → commit.** Ti
 
 **4.3 Families froze on a phantom tip (a5).** Symptom: 3 of 4 families stopped for good, firing on a tip one hop ahead of the live chain → only orphans. Cause: TN10 virtual-chain reorgs un-accept the newest hop (`removedChainBlockHashes`, ~8/min); with contention the reverted hop can lose for good, and the a5 code could only move a tip forward. Fix: **tip step-back**: keep the last 8 states, `probeBack` N-1…N-8 after "no live minter" or 2 timeouts, `TIP_BACK` line, forced state write; coordinator logs `UNACCEPT` and probes back too. Verified: rehearsal with a planted bad tip recovered in 1.13 s; a6 3/3 phantom tips back in ~5.4 s, 0 freezes. Commit `394ad0c`.
 
-**4.4 Desk share just under 15 % (a6: 14.973 %).** Cause: desk loses races to boson (network position); desk waited for the next 200 ms tick after a tip change. Fix (a7): **fire on new tip**: when a family's tip changes (own catch-up or newer shared state) the next attempt goes out at once and the following tick is dropped (rate unchanged); `tip_age_ms` + `fire` per attempt. Verified: 10-min rehearsal, see `REHEARSAL-a7.md`. Commit: see STATUS (a7 prep).
+**4.4 Desk share just under 15 % (a6: 14.973 %).** Cause: desk loses races to boson (network position); desk waited for the next 200 ms tick after a tip change. Fix (a7): **fire on new tip**: when a family's tip changes (own catch-up or newer shared state) the next attempt goes out at once and the following tick is dropped (rate unchanged); `tip_age_ms` + `fire` per attempt. Verified: 10-min rehearsal ([REHEARSAL-a7](logs/selftest-2026-10-30/step3-base/REHEARSAL-a7.md)): the desk fires first, but its share stayed 13.19 %; the race is won after submit by network position. Resolved by the criteria change in 5.2 (desk share reported only). Commit `f8e43ff`.
 
 ## 5. Scoring
 
@@ -40,6 +40,7 @@ Each entry: **symptom → cause → fix → how it was verified → commit.** Ti
 - *On every second / rejects* (after a2): attempts in every second, hops land ≥ 99 % of seconds, non-contention rejects ≤ 1 %; contention rejects (`already_spent`, `orphan`) are the point of the test, so "≥ 90 % accepted" was wrong.
 - *Mini lane share* (after a3): mini (tunnel) scored on attempts + errors only; share reported.
 - *Public-lane share* (after a4, stp option a): 15 % share rule on the desk lane only; muon/boson share depends on their distance to TN10 miners, which we don't control.
+- *Desk-lane share* (dated change 30 Oct 18:06 CET, after the a7 rehearsal, plan 2b): no lane has a share rule; desk scored like the others (attempts every second, non-contention errors ≤ 1 %), all shares reported. Reason: network position decides the race, not code (rehearsal: desk 13 % of accepted submits land, boson 76 %). `score.mjs` default `SHARE_LANES` empty.
 - *Node RPC* (after a5): p95 < 50 ms and max < 250 ms (one 97 ms spike should not decide a run).
 - *Clock gate* (after a5): preflight fails at |offset| > 80 ms (`clock_gate: fail` once the clock is fixed).
 - *Genesis-key funding* (after a5): see 2.2.
@@ -74,6 +75,7 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 5. Hosts: muon `.kaspa.blue`, boson **`.kaspa.red`**.
 6. Fresh genesis, new launch paths per run; handoff pushed to the desk receiver, sha256 checked; guard refuses before the handoff (`GUARD_PRE` non-zero) and passes after it.
 7. One builder per sender (`STORM_BUILDER_DIRECT=1`, own root), `catchup_ms: 2000`, step-back on, fire-on-tip on.
-8. START at a round minute ≥ 10 min after ready; 20 min recovery after END; scoring by a separate routine after END.
-9. After scoring: `recount.mjs` must print `RECOUNT_OK`; `score.mjs` uses `share_pass` (unrounded).
-10. Commit scrubbed: no keys, addresses, IPs, txids, hostnames, covenant ids, private paths or tokens.
+8. Scripts copied from the repo carry scrubbed default paths (`<desk-user>`): always pass `-Kit`, `-OldKit` and `-BuilderRoots` explicitly (a7 first desk launch had to be restarted at 17:08Z for this).
+9. START at a round minute ≥ 10 min after ready; 20 min recovery after END; scoring by a separate routine after END.
+10. After scoring: `recount.mjs` must print `RECOUNT_OK`; `score.mjs` uses `share_pass` (unrounded).
+11. Commit scrubbed: no keys, addresses, IPs, txids, hostnames, covenant ids, private paths or tokens.
