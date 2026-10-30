@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse.
 
-# Step 3 base · review (attempts a1–a5)
+# Step 3 base · review (attempts a1–a6)
 
 | Attempt | Result |
 |---|---|
@@ -9,6 +9,7 @@
 | a3 | full window, clean END, ~2.37 hops/s, **FAIL** (4/10). [ATTEMPT-a3](ATTEMPT-a3.md) |
 | a4 | full window, clean END, fresh genesis, **4.09 hops/s** (recount 4.12), **FAIL (6/10)**. [ATTEMPT-a4](ATTEMPT-a4.md) |
 | a5 | full window, clean END, fresh genesis, **2.93 hops/s** (recount 2.93), three families frozen for good, **FAIL (7/10 criteria)**. [ATTEMPT-a5](ATTEMPT-a5.md) |
+| a6 | full window, clean END, fresh genesis, **4.30 hops/s** (recount 7,732 = 4.30), no freeze (3 phantom tips, each recovered in ~5.4 s), 99.22 % landing seconds, **FAIL (8/10)**: desk clock −146 ms, desk share 14.973 %. [ATTEMPT-a6](ATTEMPT-a6.md) |
 
 ## a3 against the PLAN criteria
 | Criterion | Result | Detail |
@@ -123,3 +124,50 @@ Same base (4 families, rate 5, 30 min, fresh genesis, 400 coins per lane, one bu
 
 ## Note: a5 rescored under the 30 Oct RPC change (record unchanged)
 The PLAN now reads criterion 7 as node-watch RPC **p95 < 50 ms and max < 250 ms** (dated change, 30 Oct, after a5). Under that rule a5's criterion 7 would **pass**: desk p95 2 ms, max 97 ms (one sample, 13:25:44Z); mini max 3 ms. a5 would then count **8/10** (still failing criterion 1, desk clock −119.1 ms, and criterion 3, 96.61 % landing seconds). **a5's recorded result stays 7/10**: it was scored under the rule in force when it ran.
+
+## a6 against the PLAN criteria (30 Oct rules: option a, RPC p95 < 50 and max < 250 ms, clock gate)
+| # | Criterion | Result | Detail |
+|---|---|---|---|
+| 1 | Step 1 pre-checks (synced, peers ≥ 8, clock ≤ 100 ms, disk ≥ 100 GB) | **FAIL** | **desk clock −146.3 ms** at preflight, −154.0 ms after END, −157.2 ms at 16:00Z. Not fixed (needs admin). Mini +16.3 / +5.4. Synced and 8 peers on both at START. Disk 436 / 313 GB |
+| 2 | Every lane ≥ 1 attempt in each of 1,800 s | **PASS** | 1,800 / 1,800 on all four |
+| 3 | Hops land in ≥ 99 % of seconds | **PASS** | **99.22 %** (1,786 / 1,800). 14 single missed seconds |
+| 4 | Non-contention ≤ 1 % per lane | **PASS** | desk 0 · mini 0 · muon 0 · boson 25 / 34,209 (0.07 %, WebSocket drop 15:05:01–03Z) |
+| 5 | Desk ≥ 15 % of landed hops (option a) | **FAIL** | **14.973 %** (1,158 / 7,734, 3 hops short). `score.mjs` rounded it to 15.0; fixed |
+| 6 | mini / muon / boson: attempts every second + errors ≤ 1 % | **PASS** | shares mini 4.9 · muon 12.5 · boson 67.7 % (reported) |
+| 7 | Node RPC p95 < 50 and max < 250 ms | **PASS** | desk 4 / 68 ms, mini 2 / 16 ms |
+| 8 | Logs 1 row / 5 s, full window | **PASS** | node-watch 359 / 360 on both, max gap 5.02 / 5.07 s |
+| 9 | Back to baseline ≤ 10 min | **PASS** | desk mempool 3 at 1 s, mini 5 at 0 s |
+| 10 | 29 Oct items + after-END recount | **PASS** (caveat) | handoff 53 ms ✅ · guard OK ✅ · post-end CSVs ✅ · all lanes ✅ · **`RECOUNT_OK rows=4`** ✅. The guard's refusal without a handoff was not shown again in a6 (the relaunch ran it after the handoff arrived) |
+
+## Score: 8 / 10
+- **For:** the phantom-tip fix works under load. 843 `UNACCEPT`, 3 real phantom tips (f1 15:04:05, f3 15:10:34, f4 15:10:36), each back to landing in ~5.4 s, no `STALL`, no family freeze (max send gap 0.45 s on any lane and family). 4.24–4.37 hops/s in every 5 min, the best throughput so far. Landing seconds ≥ 99 % for the first time. Catch-up timeouts 4–19 per lane (a5 ~1,100+).
+- **Against:** the desk clock is still about −150 ms, and that needs stp as admin. The desk lane missed its 15 % share by 3 hops, because boson won 67.7 % of the races. The hop log keeps reverted hops (2 extra vs the recount).
+
+## a5 vs a6
+| | a5 | a6 |
+|---|---|---|
+| hops/s total | 2.93 | **4.30** |
+| hops/s by 5 min | 4.13 · 3.26 · 3.25 · 2.97 · 2.21 · 1.78 | 4.24 · 4.33 · 4.37 · 4.31 · 4.25 · 4.27 |
+| families alive at END | 1 / 4 | **4 / 4** |
+| landing seconds | 96.61 % | **99.22 %** |
+| phantom tips | 3, never recovered | 3, each recovered in ~5.4 s |
+| catch-up timeouts per lane | 1,111–1,159 | 4–19 |
+| desk share (scored) | 19.9 % | 14.973 % |
+| boson share | 58.0 % | 67.7 % |
+| desk node rpc p95 / max | 2 / 97 ms | 4 / 68 ms |
+| desk clock | −119.1 → −132.9 ms | −146.3 → −154.0 ms |
+| recount vs hop log | 5,281 vs 5,278 | 7,732 vs 7,734 |
+
+## Fixes for a7 (details in [ATTEMPT-a6](ATTEMPT-a6.md#plan-for-a7-fixes-a7-not-started))
+| Failure | Fix | Who |
+|---|---|---|
+| Desk clock ~−150 ms | Admin once on the desk: NTP peers `pool.ntp.org` (0x8), SpecialPollInterval 900 s, restart w32time, `/resync /rediscover`; check that the offset is ≤ 80 ms an hour later; then `clock_gate: fail` | **stp** |
+| Desk share 14.97 % | `sender.mjs` fire-on-new-tip (same for all lanes, rate unchanged) + `tip_age_ms` log; rehearse first (10 min, 2 families, 4 lanes); pass = desk ≥ 17 %. If it doesn't help, the share rule is stp's call | Grok Bot (desk); rule: stp |
+| Hop log keeps reverted hops | coordinator marks `revert_of` + adds `seq`; `score.mjs` skips reverted | mini bot (coordinator runs on the mini) |
+| Share rounded before the check | unrounded `share_pass` | done |
+| Guard refusal not shown | hard `GUARD_REFUSE` pre-check before the handoff exists | Grok Bot (desk) |
+| PowerShell 5 start | pwsh ≥ 7 check in `desk-a7.ps1` | Grok Bot (desk) |
+
+## Recommendation for a7 (not run)
+Same base (4 families, rate 5, 30 min, fresh genesis, 400 coins per lane, one builder per sender, option (a)). Start only after (1) stp's admin clock fix has held ≤ 80 ms for an hour, (2) the fire-on-new-tip rehearsal passes, (3) the mini bot's hop-log revert marking is in kit6. Pass bar: 10/10. Then the **2-hour confirmation** of the same setup (PLAN, 30 Oct), and only after that 3× rate and 8 families.
+
