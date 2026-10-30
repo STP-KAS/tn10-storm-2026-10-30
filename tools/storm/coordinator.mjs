@@ -112,7 +112,7 @@ while (!stopWhy) {
         if (!f.cur.nextSpk) continue;
         const st = { covenantId: f.cur.covenantId, owner: f.cur.owner, txid: norm(e.outpoint.transactionId), index: e.outpoint.index, remaining: f.cur.remaining - 1, spk: f.cur.nextSpk, seq: f.cur.seq + 1, amount: String(e.amount) };
         await publish(f, st, seen);
-        pend.push({ family: f.family, txid: st.txid, seen_utc: iso(seen), tries: 0 });
+        pend.push({ family: f.family, seq: st.seq, txid: st.txid, seen_utc: iso(seen), tries: 0 });
       } else if (Date.now() - f.lastHop > 5000 && Date.now() - (f.lastResync || 0) > 5000) {
         // The exact next minter can be spent before we poll it (two hops between polls): the tip moved past nextAddr.
         // Re-find the tip from the last known state instead of declaring a false STALL.
@@ -124,6 +124,9 @@ while (!stopWhy) {
               const seen = Date.now(); console.error(`resync family=${f.family} seq ${from.seq} -> ${tip.seq}`);
               fs.appendFileSync(P("private", "resync.jsonl"), JSON.stringify({ family: f.family, from_seq: from.seq, to_seq: tip.seq, seen_utc: iso(seen) }) + "\n");
               await publish(f, tip, seen);
+              // 30 Oct a8: back-fill the hops the resync jumped over (spent, txid unknown) so hop log = recount; the tip itself goes through pend
+              for (let q = (from.seq || 0) + 1; q < tip.seq; q++) HOPS.write(JSON.stringify({ family: f.family, seq: q, txid: "", accept_header_utc: "", seen_utc: iso(seen), source: "backfill" }) + "\n");
+              pend.push({ family: f.family, seq: tip.seq, txid: tip.txid, seen_utc: iso(seen), tries: 0, source: "resync" });
             }
           }).catch((e) => { fs.appendFileSync(P("private", "resync.jsonl"), JSON.stringify({ family: f.family, from_seq: from.seq, error: String(e?.message || e).replace(/[0-9a-f]{64}/g, "<h>").slice(0, 120), utc: iso() }) + "\n"); f.backNow = true; }).finally(() => { f.resyncing = false; });   // 30 Oct a6: log, never swallow
         }
@@ -148,12 +151,12 @@ while (!stopWhy) {
     const w = pend[i]; const h = acc.get(w.txid); w.tries++;
     if (h || w.tries > 40) {
       let ah = ""; if (h) { try { ah = iso(await headerTime(h)); } catch {} }
-      HOPS.write(JSON.stringify({ family: w.family, txid: w.txid, accept_header_utc: ah, seen_utc: w.seen_utc, source: "coord" }) + "\n"); pend.splice(i, 1);
+      HOPS.write(JSON.stringify({ family: w.family, seq: w.seq, txid: w.txid, accept_header_utc: ah, seen_utc: w.seen_utc, source: w.source || "coord" }) + "\n"); pend.splice(i, 1);
     }
   }
   await sleep(CFG.poll_ms || 200);
 }
-for (const w of pend) HOPS.write(JSON.stringify({ family: w.family, txid: w.txid, accept_header_utc: "", seen_utc: w.seen_utc, source: "coord" }) + "\n");
+for (const w of pend) HOPS.write(JSON.stringify({ family: w.family, seq: w.seq, txid: w.txid, accept_header_utc: "", seen_utc: w.seen_utc, source: w.source || "coord" }) + "\n");
 if (gapOpen) phase("GAP_END");
 phase(`STOP reason=${stopWhy}`, stopWhy === "END" ? END : Date.now());
 if (stopWhy !== "END") fs.writeFileSync(STOPF, "");

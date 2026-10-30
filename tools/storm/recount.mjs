@@ -12,4 +12,11 @@ for (const f of CFG.families) {
   const tip = await catchUp(rpc, B, st, 1_000_000).catch(() => null);
   fs.appendFileSync(out, `${new Date().toISOString()},${f.family},${st.seq || 0},${tip ? tip.seq : ""},${tip ? tip.seq - (st.seq || 0) : ""}\n`);
 }
+// 30 Oct a8: tolerance check, hop log (coord + resync + backfill lines, last line per family+seq) vs recount; <= 0.5 % -> RECOUNT_MATCH
+{ const tol = Number(arg("tol", "0.5")); const hl = P("private", "hops.jsonl"); const per = new Map(); let rc = 0;
+  for (const l of (fs.existsSync(hl) ? fs.readFileSync(hl, "utf8") : "").split("\n")) { if (!l) continue; let h; try { h = JSON.parse(l); } catch { continue; } if (h.revert_of) continue; const k = h.family + ":" + (h.seq ?? h.txid); per.set(k, 1); }
+  for (const l of fs.readFileSync(out, "utf8").trim().split("\n").slice(1)) { const c = l.split(","); if (c[4] !== "") rc += Number(c[4]); }
+  const hlN = per.size, diff = rc ? 100 * Math.abs(hlN - rc) / rc : 100;
+  const line = `${new Date().toISOString()} ${diff <= tol ? "RECOUNT_MATCH" : "RECOUNT_DIFF"} hoplog=${hlN} recount=${rc} diff_pct=${diff.toFixed(3)} tol_pct=${tol}`;
+  console.log(line); fs.appendFileSync(P("logs", "recount-check.txt"), line + "\n"); }
 try { await B.ask("quit", 3000); } catch {} await rpc.disconnect().catch(() => {}); process.exit(0);

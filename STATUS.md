@@ -52,3 +52,10 @@ Box-only senders, mini counts, desk untouched: **6/10**. 6,035 hops (3.35 hops/s
 
 ## b2 scored — 30 Oct 2026, ~22:30 CET
 Box-only senders, mini counts, 20-min window 21:00–21:20Z **completed**: **7/10**. 4,333 hops (recount) = 3.61 hops/s, 0 errors / 86,220 attempts, every lane 1,200/1,200 s, landing 92.83 %. **0 box freezes** (health max gap 5.03 s, 20:37–21:24Z) even though the agent session holding the box was cut off. Reconnect fix proven in rehearsal (379 ms), not needed in the run. Fails: clock (known), landing and recount (mini kaspad lost all peers 21:03:19–21:04:14; hop log not back-filled after the resync: 4,028 vs 4,333). [ATTEMPT-b2](logs/selftest-2026-10-30/box-b2/ATTEMPT-b2.md)
+
+## a8 running — 2-hour confirmation of a7 (started 31 Oct 2026, 00:47 CET)
+stp is back from gaming and gave full control of the desk and mini. The box is not part of the run.
+- Preflight: desk kaspad up and synced, desk clock **+0.7…+1.0 ms** (admin fix survived the reboot), mini synced via the tunnel (desk tunnel end restarted after the reboot).
+- Mini genesis keys topped up to 4 coins each. The **boson lane key was down to 3 usable coins** (used by the box runs), caught by preflight in rehearsal 1 (safe abort); all lane keys topped up to 400.
+- New in kit8: **hop-log back-fill** on resync and **`RECOUNT_MATCH`/`RECOUNT_DIFF`** (≤ 0.5 %). Rehearsal 2: `RECOUNT_MATCH` 1,833 vs 1,837 (0.22 %).
+- **START 00:05Z (01:05 CET), END 02:05Z (03:05 CET)**, recovery to ~02:25Z. [ATTEMPT-a8](logs/selftest-2026-10-30/a8/ATTEMPT-a8.md)

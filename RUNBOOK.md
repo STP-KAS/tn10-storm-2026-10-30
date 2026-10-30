@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Fall-back guide for future runs.
 
-# RUNBOOK · every problem from a1 to a7 and how it was solved
+# RUNBOOK · every problem from a1 to a8 and how it was solved
 
 Each entry: **symptom → cause → fix → how it was verified → commit.** Times are UTC. Details live in the ATTEMPT files under [`logs/selftest-2026-10-30/step3-base/`](logs/selftest-2026-10-30/step3-base/).
 
@@ -75,6 +75,15 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **When a session ends early, orchestrators keep running**: after the window, stop `b2-box.sh`, `health.sh` and the clock keeper on the box and the mini orchestrator, node-watch and post-end (never kaspad).
 - **Coordinator resync skips hops in the hop log** (b2: ~57 per family after the mini node lost peers for 55 s). Score #10 against the recount, or back-fill the skipped seqs.
 
+## 8. a8 (2-hour confirmation)
+- **Hop log missed resync-skipped hops (a7: 220, b2: ~57/family).** Fix: `coordinator.mjs` (kit8) writes the skipped seqs as `source:"backfill"` lines and the resync tip as `source:"resync"`; every line has `seq`; `score.mjs` counts back-fill hops (`hops_backfill`), never as landing seconds. Verified: reh8b 2 resyncs → 12 back-fill + 2 resync lines.
+- **`RECOUNT_OK` only checked rows.** Fix: `recount.mjs` compares hop log (unique family+seq) with the recount, `RECOUNT_MATCH` ≤ 0.5 % else `RECOUNT_DIFF`; `mini-a8.ps1` copies it to phase.log. Verified: reh8b `RECOUNT_MATCH` 1,833 vs 1,837 (0.218 %).
+- **Desk reboot kills the desk end of the mini tunnel** (mini end keeps dialing). Fix: restart `rtunnel.mjs desk --leg-port 18698 --local 127.0.0.1:17299` detached, then probe the mini node through it before launch.
+- **Lane keys can be spent by other runs** (boson key used by the box runs b1/b2: 3 usable coins left). Preflight caught it (`PREFLIGHT exit=20`, safe abort). Fix: top up all lane keys to 400 before every run; the public lanes timed out on large `getUtxosByAddresses` for the treasury once (muon), boson worked.
+- **A desk orchestrator that aborts leaves receiver/watch/post-end running** (port 18600 stays taken). Stop those pids before the next launch.
+- Mini runs Windows PowerShell 5: no `ConvertFrom-Json -DateKind` there (strings stay strings anyway).
+- After a desk reboot the clock fix held (`MaxAllowedPhaseOffset` 0, stripchart +0.7…+1.0 ms): no re-fix needed.
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.
@@ -85,5 +94,5 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 7. One builder per sender (`STORM_BUILDER_DIRECT=1`, own root), `catchup_ms: 2000`, step-back on, fire-on-tip on.
 8. Scripts copied from the repo carry scrubbed default paths (`<desk-user>`): always pass `-Kit`, `-OldKit` and `-BuilderRoots` explicitly (a7 first desk launch had to be restarted at 17:08Z for this).
 9. START at a round minute ≥ 10 min after ready; 20 min recovery after END; scoring by a separate routine after END.
-10. After scoring: `recount.mjs` must print `RECOUNT_OK`; `score.mjs` uses `share_pass` (unrounded).
+10. After scoring: `recount.mjs` must print `RECOUNT_OK` **and `RECOUNT_MATCH`** (kit8); `score.mjs` uses `share_pass` (unrounded).
 11. Commit scrubbed: no keys, addresses, IPs, txids, hostnames, covenant ids, private paths or tokens.
