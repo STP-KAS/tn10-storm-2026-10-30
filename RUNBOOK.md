@@ -67,6 +67,11 @@ w32tm /stripchart /computer:pool.ntp.org /samples:3 /dataonly
 ```
 Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), **+0.0008 / +0.0004 / +0.0004 s at 16:47:50Z** after `MaxAllowedPhaseOffset 0`. a7 runs with `clock_gate: fail`.
 
+## 7. Box as sender host (b1, 30 Oct)
+- **Box suspends when idle, so a box sender needs an active session.** Symptom: health gaps 156 s / 56 s, WebSockets dead, senders `SENDER_OFF`. Fix: an agent keeps foreground commands running (25 s loops checking senders + health) for the whole window; b1 held 19:24:30–19:50 with 0 freezes. Verified: a detached `nohup` keepalive (1 s ticks + HTTPS HEAD) alone still froze (19 s, 45 s gaps) — not a fix.
+- **NTP is blocked on the box** (UDP 123); the HTTPS offset jumps ±0.9 s after suspends. Clock gate on the box = known failure; log it only.
+- Senders must reconnect after `node_dead` (open for b2).
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.

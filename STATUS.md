@@ -46,3 +46,6 @@ Testing is paused at stp's request: he is using the desk for gaming and will res
 - **10 / 10**, the first. 9,573 hops (recount) = 5.32 hops/s, 99.28 % landing seconds, 0 non-contention errors, desk clock +5.0 / −1.1 ms, node RPC max 16 ms (desk) / 35 ms (mini), `RECOUNT_OK rows=4`.
 - New open flaws (measurement only): hop log misses 220 hops skipped by coordinator resyncs; `RECOUNT_OK` checks row count, not agreement. Fix both in the next kit.
 - **Next: 2-hour 10/10 confirmation run of the a7 setup.** Not launched; testing is paused until stp says the desk node is back and synced. Before launch: top up mini genesis keys, explicit kit paths.
+
+## b1 scored — 30 Oct 2026, ~21:05 CET
+Box-only senders, mini counts, desk untouched: **6/10**. 6,035 hops (3.35 hops/s), 0 errors / 121,110 attempts, landing 92.0 %, RECOUNT_MATCH (6,038 vs 6,035). Held-awake segment 19:24:30–19:50Z: 3.56 hops/s, 97.65 % landing, every second on all lanes, **no freeze**. Detached keepalive alone did not stop the box suspend. Fails: clock (known), every-second (start lost to suspend), landing. Desk 2-hour confirmation of a7 still pending stp.

@@ -29,3 +29,6 @@ Funding (Grok Bot TN10 wallet, sign only): box lane keys topped up to 400 coins 
 ## Known limits
 - No node lane on the box: all 4 lanes go over public WebSockets, so sender `rpc_ms` is report-only (the RPC criterion is on the mini node, as in a7).
 - The box clock steps (keeper) create small gaps/overlaps in box timestamps; they are logged.
+
+## Dated change — 30 Oct 2026, 19:24Z
+Agent holds the box awake with foreground loops until END (box suspends when idle). Recount-vs-hop-log at 0.5 % tolerance scored on the box. After END: 10-min idle test with a detached keepalive only. Outcome in ATTEMPT-b1 (6/10; keepalive alone does not prevent suspend).
