@@ -9,7 +9,7 @@ for (const k of ["error", "warn"]) { const o = console[k].bind(console); console
 process.on("uncaughtException", (e) => { console.error("uncaught", e?.stack || e); process.exit(1); });
 process.on("unhandledRejection", (e) => console.error("unhandled", String(e?.message || e)));
 import { CFG, P, phase, iso, sleep, to, stepAt, END, STOPF, reason, connect, readState, writeState, arg } from "./lib.mjs";
-import { startBuilder, buildHop, catchUp, Pool, keyAddress } from "./covenant.mjs";
+import { startBuilder, buildHop, catchUp, Pool, keyAddress, probeBack } from "./covenant.mjs";
 const CATCHUP_MS = Number(CFG.catchup_ms || 2000);   // 30 Oct a5: catch-up cap
 
 const LABEL = arg("label"), URL = arg("node"), SOURCE = arg("source", "coord");
@@ -49,17 +49,41 @@ setInterval(() => { try { fs.appendFileSync(P("logs", `pool-${LABEL}.csv`), `${i
 // tip while a catch-up runs (they still count as attempts and lose as contention), never pile up behind it.
 // On a reject the tip is marked stale; the refresh starts from the NEWEST of our cache and the shared state file
 // (another lane may have seen the tip move), so an orphan never sends us on a long walk from an old state.
-const fam$ = new Map();   // family -> { st, stale, inflight, catchup_ms }
+const fam$ = new Map();   // family -> { st, stale, inflight, catchup_ms, hist, fails }
 let inflight = 0, catchups = 0, catchupTimeouts = 0;
-function newest(a, b) { if (!a) return b; if (!b) return a; return (b.seq || 0) > (a.seq || 0) ? b : a; }
+const HIST = 8;
+// 30 Oct a6: a state verified live by the node (live_utc) beats a higher unverified one; a suspect tip (orphans on it) loses.
+function newest(a, b, suspect) {
+  if (!a) return b; if (!b) return a;
+  if (suspect != null) { if ((a.seq || 0) === suspect && (b.seq || 0) !== suspect) return b; if ((b.seq || 0) === suspect && (a.seq || 0) !== suspect) return a; }
+  if (a.live_utc && !b.live_utc && (b.seq || 0) > (a.seq || 0) && suspect != null) return a;
+  return (b.seq || 0) > (a.seq || 0) ? b : a;
+}
+function remember(f, st) { if (!st || !st.spk) return; f.hist = (f.hist || []).filter((h) => h.seq !== st.seq); f.hist.push({ ...st, amount: String(st.amount) }); f.hist.sort((x, y) => (x.seq || 0) - (y.seq || 0)); if (f.hist.length > HIST + 1) f.hist.splice(0, f.hist.length - HIST - 1); }
+async function stepBack(fam, f, from, why) {
+  const cands = (f.hist || []).filter((h) => (h.seq || 0) < (from.seq || 0) && (h.seq || 0) >= (from.seq || 0) - HIST);
+  const hit = await probeBack(rpc, cands);
+  if (!hit) { CLOG.write(JSON.stringify({ ts: iso(), sender: LABEL, family: fam, result: "tip_back", reason: "none_live", from_seq: from.seq, cands: cands.length }) + "\n"); return null; }
+  phase(`TIP_BACK sender=${LABEL} family=${fam} from=${from.seq} to=${hit.seq} why=${why}`);
+  f.hist = (f.hist || []).filter((h) => (h.seq || 0) <= hit.seq);
+  writeState(fam, { ...hit, source: "self" }, true);
+  return hit;
+}
 function refresh(fam) {
-  const f = fam$.get(fam) || { st: null, stale: true, inflight: null, catchup_ms: 0 }; fam$.set(fam, f);
+  const f = fam$.get(fam) || { st: null, stale: true, inflight: null, catchup_ms: 0, hist: [], fails: 0, suspect: null }; fam$.set(fam, f);
   if (f.inflight) return f.inflight;
-  const from = newest(f.st, readState(fam)); if (!from || !from.covenantId) return null;
+  const sh = readState(fam); remember(f, sh);
+  const from = newest(f.st, sh, f.suspect); if (!from || !from.covenantId) return null;
   const t0 = Date.now(); catchups++;
   f.inflight = to(catchUp(rpc, B, from, 100000, t0 + CATCHUP_MS), CATCHUP_MS + 500, "catchup")
-    .then((st) => { f.st = st; f.stale = false; f.catchup_ms = Date.now() - t0; if ((st.seq || 0) > ((from.seq || 0))) writeState(fam, { ...st, source: "self" }); })
-    .catch((e) => { catchupTimeouts++; f.catchup_ms = Date.now() - t0; if (!f.st) f.st = from; f.stale = true; CLOG.write(JSON.stringify({ ts: iso(), sender: LABEL, node: LABEL, family: fam, txid: "", result: "catchup", reason: /timeout|deadline/.test(String(e?.message)) ? "catchup_timeout" : "catchup_error", catchup_ms: f.catchup_ms, err: String(e?.message || e).replace(/[0-9a-f]{64}/g, "<h>").slice(0, 200) }) + "\n"); })
+    .then((st) => { st.live_utc = iso(); f.st = st; f.stale = false; f.fails = 0; f.suspect = null; remember(f, st); f.catchup_ms = Date.now() - t0; if ((st.seq || 0) > ((from.seq || 0))) writeState(fam, { ...st, source: "self" }); })
+    .catch(async (e) => {
+      catchupTimeouts++; f.fails++; f.catchup_ms = Date.now() - t0; if (!f.st) f.st = from; f.stale = true;
+      const msg = String(e?.message || e);
+      CLOG.write(JSON.stringify({ ts: iso(), sender: LABEL, node: LABEL, family: fam, txid: "", result: "catchup", reason: /timeout|deadline/.test(msg) ? "catchup_timeout" : "catchup_error", catchup_ms: f.catchup_ms, err: msg.replace(/[0-9a-f]{64}/g, "<h>").slice(0, 200) }) + "\n");
+      // 30 Oct a6: nothing live at N or ahead (or two timeouts in a row) -> probe N-1 ... N-8 and step back
+      if (/no live minter/.test(msg) || f.fails >= 2) { try { const hit = await stepBack(fam, f, from, /no live/.test(msg) ? "none_ahead" : "timeouts"); if (hit) { f.st = hit; f.stale = false; f.fails = 0; f.suspect = null; } } catch (e2) { CLOG.write(JSON.stringify({ ts: iso(), sender: LABEL, family: fam, result: "tip_back", reason: "error", err: String(e2?.message || e2).slice(0, 120) }) + "\n"); } }
+    })
     .finally(() => { f.inflight = null; });
   return f.inflight;
 }
@@ -70,7 +94,9 @@ async function current(fam) {
   if (f.stale) refresh(fam);   // do not wait: use the cached tip meanwhile
   return f.st;
 }
-function markStale(fam, why) { const f = fam$.get(fam); if (!f) return; f.stale = true; if (why === "orphan") { const sh = readState(fam); if (sh && f.st && (sh.seq || 0) > (f.st.seq || 0)) f.st = sh; } }
+// 30 Oct a6: an orphan means the input is in neither the UTXO set nor the mempool: the cached tip is SUSPECT, not just old.
+function markStale(fam, why) { const f = fam$.get(fam); if (!f) return; f.stale = true; if (why === "orphan" && f.st) { const sh = readState(fam); remember(f, sh); if (sh && (sh.seq || 0) > (f.st.seq || 0)) f.st = sh; else f.suspect = f.st.seq || 0; } }
+const busy = (fam) => { const f = fam$.get(fam); return !!(f && f.inflight); };   // 30 Oct a6: skip a family's tick while its catch-up runs
 
 async function attempt(fam) {
   inflight++; try { return await attempt1(fam); } finally { inflight--; }
@@ -92,7 +118,7 @@ async function attempt1(fam) {
   pool.coins = pool.coins.filter((c) => !(c.txid === coin.txid && c.index === coin.index));
 }
 
-const bucket = new Map(); let last = Date.now();
+const bucket = new Map(), skipT = new Map(), SKIP_MS = Number(CFG.skip_ms || 250); let last = Date.now();
 while (true) {
   const now = Date.now();
   if (now >= END || fs.existsSync(STOPF)) break;
@@ -102,6 +128,7 @@ while (true) {
     const fam = f.family;
     if (!on || fam > s.families) { bucket.set(fam, 0); continue; }
     let b = Math.min((bucket.get(fam) || 0) + s.rate * dt, Math.max(1, s.rate * 0.2));
+    if (SOURCE === "self" && busy(fam)) { const t = skipT.get(fam) || now; skipT.set(fam, t); if (now - t < SKIP_MS) { bucket.set(fam, b); continue; } } else skipT.delete(fam);   // at most 250 ms, then attempt on the cached tip
     while (b >= 1) { b -= 1; attempt(fam).catch((e) => { console.error("attempt", e.message); LOG.write(JSON.stringify({ ts: iso(), sender: LABEL, node: LABEL, family: fam, txid: "", result: "error", reason: "pre_submit", err: String(e?.message || e).replace(/[0-9a-f]{64}/g, "<h>").slice(0, 200) }) + "\n"); }); }   // 30 Oct a3: count pre-submit errors
     bucket.set(fam, b);
   }

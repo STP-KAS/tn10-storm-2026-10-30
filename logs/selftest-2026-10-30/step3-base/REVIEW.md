@@ -120,3 +120,6 @@ Same base (4 families, rate 5, 30 min, fresh genesis, 320 coins per lane). Befor
 
 ## Recommendation for a6 (not run)
 Same base (4 families, rate 5, 30 min, fresh genesis, 400 coins per lane, one builder per sender, option (a) share rule). Before starting: (1) the tip-step-back fix in sender + coordinator, with `UNACCEPT` / `TIP_BACK` logging, (2) the 5 min phantom-tip rehearsal passing, (3) the desk NTP fix plus the clock gate in preflight, (4) the skip-while-catching-up change for that family, (5) the `proc-host-desk.csv` rename and the broker `EPIPE` handler, (6) the genesis-key coin check. Pass bar: 10/10, with every family landing hops in every 5 min. Then the ladder moves on to Step 4 (4 families, 3× rate).
+
+## Note: a5 rescored under the 30 Oct RPC change (record unchanged)
+The PLAN now reads criterion 7 as node-watch RPC **p95 < 50 ms and max < 250 ms** (dated change, 30 Oct, after a5). Under that rule a5's criterion 7 would **pass**: desk p95 2 ms, max 97 ms (one sample, 13:25:44Z); mini max 3 ms. a5 would then count **8/10** (still failing criterion 1, desk clock −119.1 ms, and criterion 3, 96.61 % landing seconds). **a5's recorded result stays 7/10**: it was scored under the rule in force when it ran.

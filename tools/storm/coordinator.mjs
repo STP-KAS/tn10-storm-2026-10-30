@@ -3,7 +3,7 @@
 // time. Phase tokens: MINER, GENESIS, FAMILY_DROP, START, STEP, GAP_*, MAIN, STALL, STOP. TESTNET-10 ONLY.
 import fs from "node:fs";
 import { CFG, P, phase, iso, sleep, to, stepAt, END, T, STOPF, connect, writeState, readState, arg } from "./lib.mjs";
-import { startBuilder, materialize, spkAddress, keyAddress, nextSpk, catchUp, ofCov } from "./covenant.mjs";
+import { startBuilder, materialize, spkAddress, keyAddress, nextSpk, catchUp, ofCov, probeBack } from "./covenant.mjs";
 
 const TAKEOVER = process.argv.includes("--takeover");
 const HOPS = fs.createWriteStream(P("private", "hops.jsonl"), { flags: "a" });
@@ -15,9 +15,10 @@ await B.ask("ping", 120000);
 const fams = CFG.families.map((f) => ({ ...f, cur: null, lastHop: Date.now(), live: false, nextAddr: null }));
 const norm = (s) => String(s).replace(/^0x/, "").toLowerCase();
 
-async function publish(f, st, seen) {
+async function publish(f, st, seen, force = false) {
   const nspk = await nextSpk(B, st); st.nextSpk = nspk;
-  f.cur = st; writeState(f.family, st); f.nextAddr = spkAddress(nspk); f.lastHop = seen || Date.now();
+  f.hist = (f.hist || []).filter((h) => (h.seq || 0) < (st.seq || 0)).concat([{ ...st, amount: String(st.amount) }]).slice(-9);   // 30 Oct a6: last 8 states + current
+  f.cur = st; writeState(f.family, st, force); f.nextAddr = spkAddress(nspk); f.lastHop = seen || Date.now();
 }
 
 // --- genesis (or takeover resume)
@@ -73,6 +74,8 @@ if (!fams.some((f) => f.live)) { phase("STOP reason=no_family"); process.exit(2)
 let sink = (await rpc.getBlockDagInfo()).sink; const acc = new Map(); const hdrT = new Map();
 async function pullChain() {
   const r = await to(rpc.getVirtualChainFromBlock({ startHash: sink, includeAcceptedTransactionIds: true }), 5000);
+  const rem = new Set(r.removedChainBlockHashes || []);   // 30 Oct a6: un-accepted by a virtual-chain reorg
+  if (rem.size) for (const [t, h] of acc) if (rem.has(h)) { acc.delete(t); for (const f of fams) if (f.cur && norm(f.cur.txid) === norm(t)) { phase(`UNACCEPT family=${f.family} seq=${f.cur.seq}`); f.backNow = true; } }
   for (const a of r.acceptedTransactionIds || []) for (const t of a.acceptedTransactionIds) acc.set(t, a.acceptingBlockHash);
   const add = r.addedChainBlockHashes || []; if (add.length) sink = add[add.length - 1];
 }
@@ -122,10 +125,17 @@ while (!stopWhy) {
               fs.appendFileSync(P("private", "resync.jsonl"), JSON.stringify({ family: f.family, from_seq: from.seq, to_seq: tip.seq, seen_utc: iso(seen) }) + "\n");
               await publish(f, tip, seen);
             }
-          }).catch(() => {}).finally(() => { f.resyncing = false; });
+          }).catch((e) => { fs.appendFileSync(P("private", "resync.jsonl"), JSON.stringify({ family: f.family, from_seq: from.seq, error: String(e?.message || e).replace(/[0-9a-f]{64}/g, "<h>").slice(0, 120), utc: iso() }) + "\n"); f.backNow = true; }).finally(() => { f.resyncing = false; });   // 30 Oct a6: log, never swallow
         }
       }
     } catch {}
+    // 30 Oct a6: UNACCEPT, a failed resync or > 10 s without a hop -> probe N-1 ... N-8 at once and step back if needed
+    if (f.live && f.cur && (f.backNow || Date.now() - f.lastHop > 10000) && Date.now() - (f.lastBack || 0) > 5000 && !f.backing) {
+      f.backNow = false; f.lastBack = Date.now(); f.backing = true; const from = f.cur;
+      to((async () => { const cur = await probeBack(rpc, [from]); if (cur) return null; return probeBack(rpc, (f.hist || []).filter((h) => (h.seq || 0) < (from.seq || 0))); })(), 8000, "back").then(async (hit) => {
+        if (hit && f.cur === from) { phase(`TIP_BACK family=${f.family} from=${from.seq} to=${hit.seq}`); await publish(f, hit, Date.now(), true); }
+      }).catch((e) => fs.appendFileSync(P("private", "resync.jsonl"), JSON.stringify({ family: f.family, back_error: String(e?.message || e).slice(0, 80), utc: iso() }) + "\n")).finally(() => { f.backing = false; });
+    }
     const st = stepAt(Date.now());
     const on = st && st.step !== "gap" && f.family <= st.families;
     if (!on) f.lastHop = Date.now();

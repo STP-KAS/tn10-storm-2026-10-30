@@ -15,6 +15,8 @@ const child = spawn(CFG.builder_exe, ["storm"], {
   stdio: ["pipe", "pipe", "pipe"],
 });
 process.on("exit", () => { try { child.kill(); } catch {} });
+child.stdin.on("error", (e) => console.error("builder stdin", e.code || e.message));   // 30 Oct a6
+process.on("uncaughtException", (e) => { if (e && e.code === "EPIPE") { console.error("EPIPE ignored"); return; } console.error("uncaught", e?.stack || e); process.exit(1); });
 child.stderr.on("data", (d) => fs.appendFileSync(errFile, String(d).split(/\r?\n/).filter(Boolean).map((l) => new Date().toISOString() + " " + l + "\n").join("")));
 let buf = ""; const waiters = [];
 child.stdout.on("data", (d) => { buf += d; let i; while ((i = buf.indexOf("\n")) >= 0) { const l = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (l) { const w = waiters.shift(); if (w) w(l); } } });
@@ -41,7 +43,7 @@ function ask(cmd, ms = 120000) {
 
 const server = net.createServer((sock) => {
   let b = ""; sock.on("error", () => {}); // a client dying must not kill the shared broker (29/30 Oct ECONNRESET)
-  const reply = (r) => { if (!sock.destroyed) sock.write(r + "\n"); };
+  const reply = (r) => { try { if (!sock.destroyed && sock.writable) sock.write(r + "\n"); } catch {} };   // 30 Oct a6: no EPIPE crash when a client exits at END
   sock.on("data", (d) => {
     b += d;
     let i;

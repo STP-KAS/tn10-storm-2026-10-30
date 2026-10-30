@@ -140,6 +140,12 @@ async function liveAmong(rpc, cands) {
   }
   return best;
 }
+// 30 Oct a6: step back. A tip can leave the virtual UTXO set (a reorg un-accepts the hop): probe the last known
+// states (N-1 ... N-8) in ONE getUtxosByAddresses call and return the newest that is live, even if it is lower.
+export async function probeBack(rpc, hist) {
+  const c = (hist || []).filter((h) => h && h.spk && h.covenantId); if (!c.length) return null;
+  const hit = await liveAmong(rpc, c); if (hit) hit.live_utc = new Date().toISOString(); return hit;
+}
 // Virtual walk: intermediates are spent so step() cannot chain; probe successive nextSpk addresses in batches.
 const DL = (deadline) => { if (deadline && Date.now() > deadline) throw new Error("catchup deadline"); };
 // 30 Oct a5: growing batches (4, 8, 16, 32) so a 1-2 hop lag costs ~4 builder calls instead of 64, and after a hit
