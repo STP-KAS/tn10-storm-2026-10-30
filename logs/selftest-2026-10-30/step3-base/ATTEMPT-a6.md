@@ -38,3 +38,13 @@ Rehearsal before a6: **PASS**, see [REHEARSAL-a6](REHEARSAL-a6.md) (planted one-
 | 15:00:00 | START (10 min 45 s after everything was ready) |
 
 Known issue: on the mini, node 24 hits a libuv assert at exit after the wRPC disconnect (`UV_HANDLE_CLOSING`), so `mini-a6.ps1` parses the preflight lines instead of trusting the exit code.
+
+## First 2 minutes (15:00:00–15:02:00Z, desk submit logs)
+| Lane | Attempts | Attempting seconds | ok | already_spent | orphan | other |
+|---|---|---|---|---|---|---|
+| desk | 2,207 | 120 / 120 | 522 | 1,111 | 574 | 0 |
+| mini | 2,208 | 120 / 120 | 458 | 1,080 | 670 | 0 |
+| muon | 2,201 | 120 / 120 | 487 | 1,156 | 558 | 0 |
+| boson | 2,316 | 120 / 120 | 484 | 1,165 | 667 | 0 |
+
+Highest tip seq used, per family (f1 · f2 · f3 · f4): after minute 1: 67 · 69 · 64 · 67; after minute 2: 132 · 132 · 124 · 127. All four families growing at ≈ 1.05–1.1 hops/s each (≈ 4.3 hops/s total). No `TIP_BACK`, `STALL` or `PROC_EXIT` yet. Full score after `RECOVERY_DONE` (~15:50Z).

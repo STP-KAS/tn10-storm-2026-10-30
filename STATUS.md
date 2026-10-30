@@ -6,7 +6,7 @@
 |---|---|---|---|
 | a4 | 6/10 | 4.09 | fade after 15 min (shared builder, walk pile-up) |
 | a5 | 7/10 (8/10 under the 30 Oct RPC rule, record unchanged) | 2.93 | 3 families frozen on a phantom tip one hop ahead |
-| a6 | running | – | – |
+| a6 | running: first 2 min all 4 lanes 120/120 s, 0 errors, ≈ 4.3 hops/s | – | – |
 
 ## Open flaws and issues
 - **Desk clock** −147 ms at a6 preflight, drifting ≈ −0.33 ms/min. NTP fix needs admin on the desk (`w32tm` and elevated scheduled task: access denied). Criterion 1 fails until then; logged as a known failure (`clock_gate: log`).
