@@ -14,7 +14,7 @@
 | 08:31:29.653 | handoff push ok, sha256 match both ends, 52 ms ✅ |
 | 08:31:33 | guarded launch: broker + desk, mini, muon, boson |
 | 08:31:43 | boson sender crashed at startup: `connect timeout` to its public node (lib.mjs `to()` unhandled at connect) |
-| 08:33:31 / 08:35:15 | boson relaunched (logged "wrong_host"; endpoint is `wss://boson-10.kaspa.blue/kaspa/testnet-10/wrpc/borsh`) |
+| 08:33:31 / 08:35:15 | boson relaunched for "wrong_host": the orchestrator had `boson-10.kaspa.blue`, which does not resolve (DNS: no such host); the correct TN10 node is `wss://boson-10.kaspa.red/kaspa/testnet-10/wrpc/borsh`. The same wrong host was re-used in a3 and is now fixed in `desk-a3.ps1`. |
 | 08:33:45 | broker crashed: unhandled socket `ECONNRESET` from the dying boson client |
 | 08:34:30–43 | broker patched (`sock.on("error")`, kit3) and relaunched |
 | 08:40:00 | all 4 lanes' first attempt within 0.18 s (desk/mini .227, boson .248, muon .402) ✅ |

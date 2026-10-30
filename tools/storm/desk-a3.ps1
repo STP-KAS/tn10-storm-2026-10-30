@@ -19,7 +19,7 @@ while (-not (Test-Path "$Run\handoff.json") -and [DateTime]::UtcNow -lt $T0.AddS
 if (-not (Test-Path "$Run\handoff.json")) { & $ph "LAUNCH_ABORT reason=no_handoff"; exit 2 }
 Start-Sleep 2; & $ph "HANDOFF seen_on_desk"
 & "$Kit\launch-desk.ps1" -Kit $Kit -Config "$Run\config.json" -RunDate 2026-10-30 -Families 4 `
-  -Lanes desk,mini,muon,boson -LaneNodes @{ desk = 'ws://127.0.0.1:17210'; mini = 'ws://127.0.0.1:17299'; muon = 'wss://muon-10.kaspa.blue/kaspa/testnet-10/wrpc/borsh'; boson = 'wss://boson-10.kaspa.blue/kaspa/testnet-10/wrpc/borsh' } `
+  -Lanes desk,mini,muon,boson -LaneNodes @{ desk = 'ws://127.0.0.1:17210'; mini = 'ws://127.0.0.1:17299'; muon = 'wss://muon-10.kaspa.blue/kaspa/testnet-10/wrpc/borsh'; boson = 'wss://boson-10.kaspa.red/kaspa/testnet-10/wrpc/borsh' } `
   -LaneKeys @{ desk = 0; mini = 1; muon = 2; boson = 3 } *> "$Run\out\launch.txt"
 & $ph "LAUNCH exit=$LASTEXITCODE"
 }
