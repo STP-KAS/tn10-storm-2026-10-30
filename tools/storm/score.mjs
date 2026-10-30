@@ -10,7 +10,8 @@ for (const l of fs.readFileSync(sub, "utf8").split("\n")) { if (!l) continue; co
 for (const h of hops.values()) { const t = Date.parse(h.accept_header_utc || h.seen_utc); if (t >= W0 && t < W1) { landedWin++; landSec.add(Math.floor((t - W0) / 1000)); } }
 // 30 Oct dated change: the 15 % share rule is over desk, muon, boson only; mini (tunnel) is reported
 const SHARE = (process.env.SHARE_LANES || "desk,muon,boson").split(",");
-const tot = Object.entries(L).filter(([k]) => SHARE.includes(k)).reduce((a, [, o]) => a + o.landed, 0);
 const all = Object.values(L).reduce((a, o) => a + o.landed, 0);
+// 30 Oct a5 (option a): with ONE share lane (desk) the rule is that lane's share of ALL landed hops (a share of itself would always be 100 %)
+const tot = SHARE.length === 1 ? all : Object.entries(L).filter(([k]) => SHARE.includes(k)).reduce((a, [, o]) => a + o.landed, 0);
 const rows = Object.entries(L).map(([k, o]) => ({ lane: k, ...o, noncont_pct: +(100 * o.noncont / o.att).toFixed(2), landed_share_pct: +(100 * o.landed / all).toFixed(1), share_rule: SHARE.includes(k) ? +(100 * o.landed / tot).toFixed(1) : "reported_only", secs_attempting: attSec[k].size }));
 console.log(JSON.stringify({ window_s: N, hops_landed_in_window: landedWin, attributed: tot, land_secs: landSec.size, land_secs_pct: +(100 * landSec.size / N).toFixed(2), lanes: rows }, null, 1));
