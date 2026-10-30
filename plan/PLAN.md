@@ -33,6 +33,7 @@ Measure: hops/s per family and total; accepted vs attempted per lane; node RPC t
 
 - **On every second** (dated change, Fri 30 Oct 2026): every lane makes **≥ 1 submit attempt in each of the 1,800 s**, and hops land in **≥ 99 %** of seconds.
 - **Rejects** (dated change, Fri 30 Oct 2026, replaces "≥ 90 % accepted per lane"): every reject is a contention reject (`already_spent` or `orphan`); non-contention rejects (errors, timeouts, other) **≤ 1 %** of attempts per lane; each lane gets **≥ 15 %** of landed hops.
+- **Mini lane share** (dated change, Fri 30 Oct 2026, after a3): the **≥ 15 % landed-hop share** rule applies to the **desk, muon and boson** lanes (share of the hops those three landed). The **mini lane**, which runs on the desk but reaches the mini through the tunnel, is scored separately on **attempts every second** and **non-contention errors ≤ 1 %** only; its share is reported, not scored. All senders stay on the desk (stp's rule). Pre-submit errors (builder/connect) now count as non-contention errors.
 - Node RPC **< 50 ms**.
 - Logs at **one row per 5 s**, full window, desk and mini.
 - Node back to baseline **within 10 min** after stop (mempool rule below).

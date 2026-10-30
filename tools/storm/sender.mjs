@@ -20,6 +20,7 @@ const nFam = CFG.families.length;
 let alive = true, skipped = false, dropped = false, daa = 0n, daaAt = Date.now(), nonce = 1, shapeRej = 0, shapeTry = 0;
 const selfState = new Map();   // family -> state, for source=self
 
+let fails = 0;   // 30 Oct a3: node_dead only after 3 failed probes in a row (muon flapped for 11 s)
 async function health() {
   let bad = "";
   try {
@@ -28,11 +29,14 @@ async function health() {
     if (!si.isSynced) bad = "not_synced"; else if (Date.now() - daaAt > 30000) bad = "daa_still";
     if (!skipped && Number(info.mempoolSize) >= 90000) { skipped = true; phase(`NODE_SKIP node=${LABEL} reason=mempool_90k`); }
   } catch { bad = "rpc"; }
+  if (bad) fails++; else fails = 0;
+  if (bad && fails < 3) bad = "";
   if (bad && alive) { alive = false; phase(`SENDER_OFF sender=${LABEL} reason=node_dead`); }
   else if (!bad && !alive && !fs.existsSync(P("control", `HOLD-${LABEL}`))) { alive = true; phase(`SENDER_ON sender=${LABEL}`); }
   if (Date.now() - pool.at > 5000) pool.refresh().catch(() => {});
 }
-setInterval(() => health().catch(() => {}), 5000);
+setInterval(() => health().catch(() => {}), 2000);
+setInterval(() => { try { fs.appendFileSync(P("logs", `pool-${LABEL}.csv`), `${iso()},${pool.coins.length}\n`); } catch {} }, 5000);   // pool size per lane
 
 async function current(fam) {
   if (SOURCE === "self") {
@@ -73,7 +77,7 @@ while (true) {
     const fam = f.family;
     if (!on || fam > s.families) { bucket.set(fam, 0); continue; }
     let b = Math.min((bucket.get(fam) || 0) + s.rate * dt, Math.max(1, s.rate * 0.2));
-    while (b >= 1) { b -= 1; attempt(fam).catch((e) => console.error("attempt", e.message)); }
+    while (b >= 1) { b -= 1; attempt(fam).catch((e) => { console.error("attempt", e.message); LOG.write(JSON.stringify({ ts: iso(), sender: LABEL, node: LABEL, family: fam, txid: "", result: "error", reason: "pre_submit", err: String(e?.message || e).replace(/[0-9a-f]{64}/g, "<h>").slice(0, 200) }) + "\n"); }); }   // 30 Oct a3: count pre-submit errors
     bucket.set(fam, b);
   }
   await sleep(20);
