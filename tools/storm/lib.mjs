@@ -54,7 +54,10 @@ export function reason(e) {
   if (/timeout|timed out|closed|not connected|disconnect|websocket|connect/i.test(s)) return "rpc";
   return "other";
 }
-export async function connect(url) {
+export async function connect(url, tries = 8) {   // 30 Oct a2: a startup connect timeout killed boson; retry with backoff
+  for (let i = 1; ; i++) { try { return await connect1(url); } catch (e) { if (i >= tries || /route:/.test(String(e.message))) throw e; console.error(`connect retry ${i} in ${Math.min(30, 2 ** i)}s: ${e.message}`); await new Promise((r) => setTimeout(r, Math.min(30, 2 ** i) * 1000)); } }
+}
+async function connect1(url) {
   const c = new kaspa.RpcClient({ url, encoding: kaspa.Encoding.Borsh, networkId: NET });
   await to(c.connect({ timeoutDuration: 8000, blockAsyncConnect: true }), 10000, "connect");
   const si = await to(c.getServerInfo(), 5000);

@@ -8,7 +8,7 @@
   .\launch-desk.ps1 ... -GuardOnly     # only run the guard + clock check, start nothing
 #>
 param([string]$Kit, [string]$Config, [string]$RunDate, [int]$Families = 4, [string[]]$Lanes = @('desk'),
-      [hashtable]$LaneNodes = @{ desk = 'ws://127.0.0.1:17210' }, [string]$NodeExe = 'node',
+      [hashtable]$LaneNodes = @{ desk = 'ws://127.0.0.1:17210' }, [hashtable]$LaneKeys = @{}, [string]$NodeExe = 'node',
       [switch]$Coordinator, [switch]$Takeover, [switch]$GuardOnly, [switch]$AllowTest)
 $ErrorActionPreference = 'Stop'
 $env:STORM_CONFIG = $Config
@@ -31,7 +31,7 @@ if ($Coordinator) { $c = Start-Process $NodeExe -ArgumentList 'coordinator.mjs' 
 if ($Takeover) { $c = Start-Process $NodeExe -ArgumentList 'coordinator.mjs --takeover --label desk --reason mini_dead' @s -RedirectStandardOutput "$run\out\coord-takeover.out" -RedirectStandardError "$run\out\coord-takeover.err"; "takeover coordinator pid $($c.Id)" }
 $src = if ($Coordinator -or $Takeover) { 'coord' } else { 'self' }
 foreach ($l in $Lanes) {   # all lanes start in the same second so the window has every sender on
-  $p = Start-Process $NodeExe -ArgumentList "sender.mjs --label $l --source $src --node $($LaneNodes[$l])" @s -RedirectStandardOutput "$run\out\sender-$l.out" -RedirectStandardError "$run\out\sender-$l.err"
+  $p = Start-Process $NodeExe -ArgumentList "sender.mjs --label $l --source $src --node $($LaneNodes[$l])$(if ($LaneKeys.ContainsKey($l)) { ' --key ' + $LaneKeys[$l] })" @s -RedirectStandardOutput "$run\out\sender-$l.out" -RedirectStandardError "$run\out\sender-$l.err"
   "sender $l pid $($p.Id)"
 }
 "stop: New-Item $run\control\STOP"

@@ -55,5 +55,23 @@ Clock: desk −88.8 ms at launch, −91.0 ms after END (inside 100 ms, marginal)
 | Missing-29-Oct items | handoff auto-copy ✅, guard ✅, all four on together ✅, mini post-end clock ✅, full node-watch ✅; post-end mempool CSVs as separate files ❌ (data is in node-watch) |
 
 ## Raw logs (not in git; private dir holds submit JSONL, 35 MB)
-- desk `C:\Users\Remco\tn10-storm-2026-10-30\step3-a2\{logs,out,state,private\submit-*.jsonl}`
-- mini `C:\Users\sremc\tn10-storm-2026-10-30\step3-a2\{logs,out,state}`
+- desk `C:\Users\<desk-user>\tn10-storm-2026-10-30\step3-a2\{logs,out,state,private\submit-*.jsonl}`
+- mini `C:\Users\<mini-user>\tn10-storm-2026-10-30\step3-a2\{logs,out,state}`
+
+## Re-scored against the 30 Oct criteria (PLAN dated change)
+Scored with `tools/storm/score.mjs` (submit logs joined with the mini coordinator's landed-hop log; 7,701 of 7,701 in-window hops attributed to a lane).
+
+| Lane | Attempting seconds (need 1,800) | Non-contention rejects (≤ 1 %) | Landed hops | Share (≥ 15 %) |
+|---|---|---|---|---|
+| desk | 1,144 ❌ | 0 % ✅ | 2,107 | 27.4 % ✅ |
+| mini | 1,357 ❌ | 0 % ✅ | 544 | 7.1 % ❌ |
+| muon | 1,164 ❌ | 0 % ✅ | 894 | 11.6 % ❌ |
+| boson | 1,160 ❌ | 0 % ✅ | 4,156 | 54.0 % ✅ |
+
+Seconds with ≥ 1 landed hop: **1,725 / 1,800 = 95.8 %** ❌ (need 99 %).
+
+**a2 verdict: FAIL** on "attempt every second", "hops in 99 % of seconds" and the 15 % share (mini, muon). Rejects pass.
+
+Causes found:
+- **Idle seconds:** gaps of up to 4 s on every lane (8 s on desk late in the window). The sender's coin pool drops each spent funding coin and only refreshed every 5 s, so a lane with an empty pool sat idle. The desk lane (key 0) had only 9 funding coins left after a2 (others ~100), so its gaps grew in the last 15 min.
+- **Low share for mini and muon:** they are the slow paths (mini via the tunnel, muon public with a 91 ms submit p50), so they lose the race for the same outpoint.
