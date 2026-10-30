@@ -32,3 +32,12 @@ a6 (15:00–15:30Z): no freeze. 3 phantom tips, each recovered in ~5.4 s. 843 `U
 2c. **a7 running** ([ATTEMPT-a7](logs/selftest-2026-10-30/step3-base/ATTEMPT-a7.md)): START 17:35:00Z, END 18:05:00Z, recovery to 18:25Z. First 2 min clean: all 4 lanes 120/120 s, 0 errors, ≈ 5.3 hops/s.
 3. Mini bot: hop-log revert marking + `seq` in `coordinator.mjs` (kit6).
 4. a7 (same base). After the first 10/10: a **2-hour run of the same setup that must also score 10/10**, then 3× rate, then 8 families.
+
+## Paused — Fri 30 Oct 2026, 19:35 CET (18:35 UTC)
+
+Testing is paused at stp's request: he is using the desk for gaming and will restart the desk and its node afterwards.
+
+- a7 ran its full window (17:35–18:05 UTC) and recovery; its logs are on disk. It is **not scored yet**; scoring was paused before it ran.
+- No sender, builder or coordinator is running. The 2-hour confirmation run has not started.
+- The desk clock fix (NTP via pool.ntp.org, MaxAllowedPhaseOffset 0) should survive the restart. Re-check it in preflight.
+- Resume order once the desk node is back and synced: score a7, then the 2-hour run if a7 is 10/10, otherwise a8. Top up the mini genesis keys before the next launch (see RUNBOOK).
