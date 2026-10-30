@@ -5,6 +5,8 @@ import net from "node:net";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import { CFG, P } from "./lib.mjs";
+// 30 Oct a5: timestamp every stderr line (console + builder stderr)
+for (const k of ["error", "warn"]) { const o = console[k].bind(console); console[k] = (...a) => o(new Date().toISOString(), ...a); }
 
 const PORT = Number(process.env.STORM_BUILDER_PORT || CFG.builder_port || 17310);
 const errFile = P("private", "builder.err");
@@ -13,7 +15,7 @@ const child = spawn(CFG.builder_exe, ["storm"], {
   stdio: ["pipe", "pipe", "pipe"],
 });
 process.on("exit", () => { try { child.kill(); } catch {} });
-child.stderr.on("data", (d) => fs.appendFileSync(errFile, d));
+child.stderr.on("data", (d) => fs.appendFileSync(errFile, String(d).split(/\r?\n/).filter(Boolean).map((l) => new Date().toISOString() + " " + l + "\n").join("")));
 let buf = ""; const waiters = [];
 child.stdout.on("data", (d) => { buf += d; let i; while ((i = buf.indexOf("\n")) >= 0) { const l = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (l) { const w = waiters.shift(); if (w) w(l); } } });
 child.on("exit", (c) => { console.error("builder exit", c); while (waiters.length) waiters.shift()(JSON.stringify({ ok: false, error: "builder exit " + c })); process.exit(1); });

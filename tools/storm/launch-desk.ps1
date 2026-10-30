@@ -9,7 +9,7 @@
 #>
 param([string]$Kit, [string]$Config, [string]$RunDate, [int]$Families = 4, [string[]]$Lanes = @('desk'),
       [hashtable]$LaneNodes = @{ desk = 'ws://127.0.0.1:17210' }, [hashtable]$LaneKeys = @{}, [string]$NodeExe = 'node',
-      [switch]$Coordinator, [switch]$Takeover, [switch]$GuardOnly, [switch]$AllowTest)
+      [switch]$Coordinator, [switch]$Takeover, [switch]$GuardOnly, [switch]$AllowTest, [string]$BuilderRoots = '')   # 30 Oct a5: -BuilderRoots <dir> = one builder per sender, root <dir>\<lane>
 $ErrorActionPreference = 'Stop'
 $env:STORM_CONFIG = $Config
 $run = (Get-Content $Config -Raw | ConvertFrom-Json).run_dir
@@ -25,12 +25,14 @@ if ($g -ne 0) { "REFUSED: handoff guard exit $g; senders not started"; exit 2 }
 if ($GuardOnly) { "guard OK (GuardOnly: nothing started)"; exit 0 }
 & $NodeExe "$Kit\handoff.mjs" import "$run\handoff.json"; if ($LASTEXITCODE -ne 0) { "REFUSED: import failed"; exit 3 }
 $s = @{ WorkingDirectory = $Kit; WindowStyle = 'Hidden'; PassThru = $true }
+if ($BuilderRoots) { $b = $null; "broker none (one builder per sender)" } else {
 $b = Start-Process $NodeExe -ArgumentList 'builder-broker.mjs' @s -RedirectStandardOutput "$run\out\broker.out" -RedirectStandardError "$run\out\broker.err"
-Start-Sleep 3; "broker pid $($b.Id)"
+Start-Sleep 3; "broker pid $($b.Id)" }
 if ($Coordinator) { $c = Start-Process $NodeExe -ArgumentList 'coordinator.mjs' @s -RedirectStandardOutput "$run\out\coord.out" -RedirectStandardError "$run\out\coord.err"; "coordinator pid $($c.Id)" }
 if ($Takeover) { $c = Start-Process $NodeExe -ArgumentList 'coordinator.mjs --takeover --label desk --reason mini_dead' @s -RedirectStandardOutput "$run\out\coord-takeover.out" -RedirectStandardError "$run\out\coord-takeover.err"; "takeover coordinator pid $($c.Id)" }
 $src = if ($Coordinator -or $Takeover) { 'coord' } else { 'self' }
 foreach ($l in $Lanes) {   # all lanes start in the same second so the window has every sender on
+  if ($BuilderRoots) { $env:STORM_BUILDER_DIRECT = '1'; $env:STORM_ROOT = Join-Path $BuilderRoots $l }
   $p = Start-Process $NodeExe -ArgumentList "sender.mjs --label $l --source $src --node $($LaneNodes[$l])$(if ($LaneKeys.ContainsKey($l)) { ' --key ' + $LaneKeys[$l] })" @s -RedirectStandardOutput "$run\out\sender-$l.out" -RedirectStandardError "$run\out\sender-$l.err"
   "sender $l pid $($p.Id)"
 }
