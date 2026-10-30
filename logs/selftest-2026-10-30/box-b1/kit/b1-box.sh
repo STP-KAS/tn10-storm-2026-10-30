@@ -6,7 +6,7 @@ R=<box-run-root>/b1; mkdir -p $R/out $R/logs; ph(){ echo "$(date -u +%FT%TZ) $*"
 T0=$(date -d 2026-10-30T19:20:00Z +%s); END=$(date -d 2026-10-30T19:50:00Z +%s); REC=$((END+1200))
 nohup ./health.sh $R/logs/health-box.csv $REC >/dev/null 2>&1 & ph "HEALTH pid=$!"
 ck(){ node clock-offset.mjs --samples 3 --log $R/logs/clock-box.csv | sed -E 's/.*offset_ms=(-?[0-9.]+).*/\1/'; }
-( while [ $(date +%s) -lt $REC ]; do o=$(ck); if [ -n "$o" ] && awk "BEGIN{exit !($o>40||$o<-40)}"; then sudo -n date -s "@$(python3 -c "import time;print('%.3f'%(time.time()+$o/1000))")" >/dev/null && ph "CLOCK_STEP offset_ms=$o"; fi; sleep 120; done ) >/dev/null 2>&1 &
+( while [ $(date +%s) -lt $REC ]; do ck >/dev/null; sleep 15; done ) >/dev/null 2>&1 &   # 30 Oct b1: log only; stepping fought a host-side clock that jumps by 100s of ms
 ph "CLOCKKEEP pid=$!"
 while [ ! -f $R/handoff.json ] && [ $(date +%s) -lt $((T0-60)) ]; do sleep 1; done
 [ -f $R/handoff.json ] || { ph "LAUNCH_ABORT reason=no_handoff"; exit 2; }
