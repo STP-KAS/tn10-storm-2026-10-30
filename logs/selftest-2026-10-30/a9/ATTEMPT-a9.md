@@ -81,3 +81,6 @@ Data: [score-a9.json](data/score-a9.json), [recount-a9.csv](data/recount-a9.csv)
 2. Top up the 4 mini genesis keys (≥ 3 coins ≥ 15 tKAS each) and the lanes back to 600/600/600/800 before a10.
 3. Deploy the fixed `clock-offset.mjs` to the desk and mini kits.
 4. a10 = the same 2-hour setup again once the criterion-9 rule is settled; scaling stays blocked until a 2-hour 10/10.
+
+## Re-score, 31 Oct 2026 (criterion 9 changed by stp, 07:36 CET)
+New criterion 9: 0 own transactions in the desk and mini mempools at END + 10 min. a9 logged only mempool **size** after END (`post-end-mempool-*.csv`), no own-tx counts, so **criterion 9 is unconfirmed** and the score stays **9/10 (unconfirmed for 9)**. Evidence against: a census at END + 73–76 min found 3 own tx (desk) and 6 (mini), persistent, mass ≈ 200 k, not orphans, see RUNBOOK 11. a10 is therefore the same 2-hour setup, not 3x.

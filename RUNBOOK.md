@@ -98,6 +98,13 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **Criterion 9 still fails strictly** on the foreign backlog (desk 52, mini 676 before START; 55 / 679 at END). The run returns to baseline at 0 s (unofficial baseline + 5: PASS reached, short foreign spikes above it later in the 10 min, as before START). Open: rule decision (stp) — baseline + 5, or "0 of our txs in the mempool census at END + 10 min".
 - **Genesis keys at 1 coin ≥ 15 tKAS each after a9.** Top up before a10 (preflight `--genesis` would still pass with 1, but a relaunch would not).
 
+## 11. Criterion 9 = own-tx census (31 Oct, stp 07:36 CET) and a10
+- **New rule:** 0 of our transactions (paying to lane or genesis keys) in the desk and mini mempools at END + 10 min. Tooling: `mempool-ro.mjs --extra <genesis addr file> --wait 0 --label <node> --log <run>/logs/mempool-ours.jsonl`; `--save-pre` before START stores the ids of our txs already stuck (private run dir), `--pre` reports `ours_new` without them. `desk-a10.ps1` runs it at END + 10 min for desk and mini (tunnel) and writes `CRIT9 node=… ours=… ours_new=…`. `score.mjs … <census.jsonl>` → `crit9.pass` (strict) and `crit9.pass_excl_pre_start`.
+- **a9 under the new rule: unconfirmed.** a9 logged only mempool size at END + 10 min, no own-tx counts. Census at 06:38–06:41Z (73–76 min after the a9 END): **3 own tx on desk, 6 on mini, still there 30 s later** (2 in / 3 out, mass ≈ 200,000, fee 0.05 tKAS, not orphans, paying to lane keys 0/1/3). Nothing of ours was sent between END and then, so these are most likely a9 leftovers and a9 would likely **fail** the new criterion 9; they sit above the standard mass limit and are not mined. They cannot be cleared without restarting kaspad (not allowed); they stay until mempool expiry.
+- **Consequence for a10:** these 9 are pre-START own txs. Strict scoring fails a10 on them. `ours_new` (own txs created in a10) is logged so stp can decide whether pre-existing stuck txs count. Root cause (which family/hop produces ≈ 200 k-mass txs) is open.
+- **Funding scripts need `send`.** `fund-gen8.mjs` / `fund-lanes9.mjs` without `send` are a dry run (prints `outputs` only). a10 prep: genesis 4 coins each, lanes 600/600/600/800, after `send prep` then `send`.
+- `clock-offset.mjs` fix deployed (desk kit10, mini kit/kit8); check rows desk +4.6 ms, mini +23.7 ms (n=5).
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.

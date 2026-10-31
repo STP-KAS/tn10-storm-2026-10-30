@@ -1,14 +1,23 @@
-// mempool-ro.mjs <config> [url]: READ-ONLY mempool census. Two snapshots 60 s apart: count, orphan, fee, ours (spends/pays our lane+genesis keys) vs others, persistent ids. Prints no ids, keys or addresses.
+// mempool-ro.mjs <config> [url] [--extra <file of addresses, one per line>] [--wait 60] [--label desk] [--log <jsonl>]
+// READ-ONLY mempool census (31 Oct a10, criterion 9 = 0 of OUR transactions left 10 min after END, stp 07:36 CET).
+// "Ours" = a tx that pays to one of our lane keys (keys_file) or genesis keys (--extra addresses); our hops and funding always
+// return change to our key, so every tx of ours has such an output. Snapshot, optional second snapshot after --wait s.
+// Prints and logs counts only: no ids, keys or addresses.
 import fs from "node:fs"; import { createRequire } from "node:module";
-const require=createRequire(import.meta.url); const c=JSON.parse(fs.readFileSync(process.argv[2],"utf8").replace(/^\uFEFF/,""));
-const k=require(c.kaspa_sdk); const r=new k.RpcClient({url:process.argv[3]||c.main_node_url,encoding:k.Encoding.Borsh,networkId:"testnet-10"}); await r.connect({timeoutDuration:15000});
+const require=createRequire(import.meta.url); const arg=(n,d)=>{const i=process.argv.indexOf("--"+n); return i>0?process.argv[i+1]:d;};
+const pos=process.argv.slice(2).filter((a,i,A)=>!a.startsWith("--")&&!(i>0&&A[i-1].startsWith("--")));
+const c=JSON.parse(fs.readFileSync(pos[0],"utf8").replace(/^\uFEFF/,""));
+const k=require(c.kaspa_sdk); const r=new k.RpcClient({url:pos[1]||c.main_node_url,encoding:k.Encoding.Borsh,networkId:"testnet-10"}); await r.connect({timeoutDuration:15000});
 const mine=new Set(fs.readFileSync(c.keys_file,"utf8").trim().split(/\r?\n/).map(h=>new k.PrivateKey(h.trim()).toKeypair().toAddress("testnet-10").toString()));
+const ex=arg("extra"); if(ex&&fs.existsSync(ex)) for(const a of fs.readFileSync(ex,"utf8").split(/\s+/)) if(a) mine.add(a.trim());
 const snap=async()=>{const m=await r.getMempoolEntries({includeOrphanPool:true,filterTransactionPool:false}); return m.mempoolEntries||m.entries||[];};
-const cls=(e)=>{const t=e.transaction; let ours=false; for(const o of t.outputs||[]){try{const a=k.addressFromScriptPublicKey(o.scriptPublicKey,"testnet-10")?.toString(); if(mine.has(a)) ours=true;}catch{}} return ours;};
-const s1=await snap(); const ids1=new Set(s1.map(e=>e.transaction.verboseData?.transactionId||e.transaction.id));
-await new Promise(z=>setTimeout(z,60000)); const s2=await snap();
-const st=(s)=>{let o=0,orph=0,fee=0n,ins=0,outs=0; for(const e of s){if(cls(e))o++; if(e.isOrphan)orph++; fee+=BigInt(e.fee||0); ins+=(e.transaction.inputs||[]).length; outs+=(e.transaction.outputs||[]).length;} return {n:s.length,ours:o,others:s.length-o,orphan:orph,avg_fee_sompi:s.length?Number(fee/BigInt(s.length)):0,avg_in:+(ins/(s.length||1)).toFixed(1),avg_out:+(outs/(s.length||1)).toFixed(1)};};
-const persist=s2.filter(e=>ids1.has(e.transaction.verboseData?.transactionId||e.transaction.id)).length;
-const si=await r.getServerInfo();
-console.log(JSON.stringify({utc:new Date().toISOString(),synced:si.isSynced,snap1:st(s1),snap2:st(s2),persisted_60s:persist}));
+const isOurs=(e)=>{for(const o of e.transaction.outputs||[]){try{if(mine.has(k.addressFromScriptPublicKey(o.scriptPublicKey,"testnet-10")?.toString())) return true;}catch{}} return false;};
+const idOf=(e)=>e.transaction.verboseData?.transactionId||e.transaction.id;
+const st=(s)=>{let o=0,orph=0; for(const e of s){if(isOurs(e))o++; if(e.isOrphan)orph++;} return {n:s.length,ours:o,others:s.length-o,orphan:orph};};
+const s1=await snap(); const W=Number(arg("wait","60")); let out={utc:new Date().toISOString(),label:arg("label",""),our_keys:mine.size,snap1:st(s1)};
+if(W>0){const ids=new Set(s1.map(idOf)); await new Promise(z=>setTimeout(z,W*1000)); const s2=await snap(); out.snap2=st(s2); out.persisted=s2.filter(e=>ids.has(idOf(e))).length;}
+// --save-pre <file>: store ids of our txs already in the mempool (pre-START, private run dir, never git); --pre <file>: report ours_new excluding them.
+const ourIds=s1.filter(isOurs).map(idOf); if(arg("save-pre")) fs.writeFileSync(arg("save-pre"),ourIds.join("\n")+"\n");
+if(arg("pre")&&fs.existsSync(arg("pre"))){const pre=new Set(fs.readFileSync(arg("pre"),"utf8").split(/\s+/).filter(Boolean)); out.ours_pre_start=ourIds.filter(i=>pre.has(i)).length; out.ours_new=ourIds.length-out.ours_pre_start;}
+const line=JSON.stringify(out); console.log(line); if(arg("log")) fs.appendFileSync(arg("log"),line+"\n");
 await r.disconnect(); process.exit(0);

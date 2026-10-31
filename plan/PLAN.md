@@ -42,6 +42,7 @@ Measure: hops/s per family and total; accepted vs attempted per lane; node RPC t
 - **Genesis-key funding** (dated change, Fri 30 Oct 2026, after a5): before genesis, every family's genesis key must hold ≥ 1 coin of ≥ 15 tKAS (`preflight.mjs --genesis` on the main-node machine), or the launch aborts.
 - Logs at **one row per 5 s**, full window, desk and mini.
 - Node back to baseline **within 10 min** after stop (mempool rule below).
+- **Own-tx mempool rule** (dated change, Sat 31 Oct 2026, 07:36 CET, stp's decision; replaces the mempool size rule for criterion 9): **0 of our own transactions** (any tx paying to our lane keys or genesis keys) left in the desk and mini mempools **10 min after END**. Measured by the read-only census `mempool-ro.mjs` at END + 10 min (`desk-a10.ps1` → `logs/mempool-ours.jsonl`, `CRIT9` phase lines), scored by `score.mjs` (5th arg). Foreign TN10 traffic no longer counts. Counts only; ids and addresses stay private.
 
 ### Why the 30 Oct criteria change
 The 90 % rule cannot be met under designed contention: four senders race for the same covenant outpoint per family, so about three of four submits lose with `already_spent` by design (a2: 20–28 % accepted per lane, zero non-contention rejects). "On every second" was undefined; it is now measured from the submit log and the landed-hop log. See [ATTEMPT-a2](../logs/selftest-2026-10-30/step3-base/ATTEMPT-a2.md). Scored with `tools/storm/score.mjs`.
@@ -71,6 +72,6 @@ Each its own run, same 30 min, same pass criteria, base = Step 3 rate:
 | All senders on simultaneously (moved to the desk) | Step 3 pass |
 | Mini post-end mempool and NTP logs | logs |
 | Full node-watch on desk and mini, start to recovery | logs |
-| Mempool recovery rule: **≤ 5** instead of exactly 0 (dated change, 29 Oct; TN10 background traffic keeps it 1–52) | Pass criteria |
+| Mempool recovery rule: **≤ 5** instead of exactly 0 (dated change, 29 Oct; TN10 background traffic keeps it 1–52). **Replaced 31 Oct 07:36 CET (stp): 0 own tx at END + 10 min** | Pass criteria |
 
 Only after Steps 1–5 and the wallet/miner check pass: ask Pulse for a rerun.
