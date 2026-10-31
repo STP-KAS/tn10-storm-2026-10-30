@@ -8,3 +8,4 @@
 - Mini orchestrator first try aborted at 06:41Z (`LAUNCH_ABORT reason=genesis_funding`: the genesis top-up had run dry, without `send`); relaunched 06:48Z after funding, `PREFLIGHT_GENESIS exit=0`.
 - **First slot (07:15Z) aborted** at 07:07Z: `PREFLIGHT exit=20`, boson usable 4,705 tKAS < 8,600 (800 coins but many small after a9). Boson topped up to 1,120 coins (+320 × 16 tKAS, ~8,865 usable). Both orchestrators and their child processes stopped (never kaspad), aborted run dirs kept as `step3-a10-abort`, fresh run dirs, relaunched 07:12Z for the 07:45Z window. The 07:07Z genesis of the first slot used 1 genesis coin per key (3 left each).
 - Lesson (RUNBOOK 11): the funding target must count usable value, not coins; `fund-lanes` should top up to `usable_min_tkas`.
+- **START 07:45:00Z** (08:45 CET): preflight exit 0 (07:37:12Z), guard 0, LAUNCH 07:37:21Z, all 4 senders, 4 families, rate 5. Normal TIP_BACK at 07:45:50Z (family 3, recovered).
