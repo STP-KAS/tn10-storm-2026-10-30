@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Running status, updated with each attempt.
 
-# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · paused for desk restart
+# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · **a8 (2 h) SCORED 7/10** (5.06 hops/s, boson lane ran out of coins)
 
 **[RUNBOOK](RUNBOOK.md)**: every problem a1–a7, how it was solved, and the launch checklist.
 
@@ -59,3 +59,12 @@ stp is back from gaming and gave full control of the desk and mini. The box is n
 - Mini genesis keys topped up to 4 coins each. The **boson lane key was down to 3 usable coins** (used by the box runs), caught by preflight in rehearsal 1 (safe abort); all lane keys topped up to 400.
 - New in kit8: **hop-log back-fill** on resync and **`RECOUNT_MATCH`/`RECOUNT_DIFF`** (≤ 0.5 %). Rehearsal 2: `RECOUNT_MATCH` 1,833 vs 1,837 (0.22 %).
 - **START 00:05Z (01:05 CET), END 02:05Z (03:05 CET)**, recovery to ~02:25Z. [ATTEMPT-a8](logs/selftest-2026-10-30/a8/ATTEMPT-a8.md)
+
+## a8 scored — Sat 31 Oct 2026, ~03:45 CET
+2-hour confirmation of a7 (00:05–02:05Z = 01:05–03:05 CET): **7/10, not passed**. Scaling stays blocked.
+- **36,418 hops by recount = 5.06 hops/s** (f1 9,142 · f2 9,089 · f3 9,052 · f4 9,135). **`RECOUNT_OK rows=4`, `RECOUNT_MATCH hoplog=36415 recount=36418 diff_pct=0.008`** (kit8 back-fill works: 365 back-fill lines, 60 resyncs).
+- Clean: 0 freezes/`STALL`/`PROC_EXIT`, 0 non-contention errors in 518,831 attempts, landing 99.49 %, node RPC p95 6 / 2 ms (max 17 / 26), clocks desk +4.2 / +4.5 ms, mini +8.8 / +17.1 ms, node-watch full window.
+- **Fail 1+2 (criteria 2 and 6): boson lane funding pool ran dry** (first 0 coins 01:40:21Z): 39 seconds without a boson attempt (7,161 / 7,200), boson landed nothing after ~01:45Z, total fell to ≈ 4.4 hops/s for the last 20 min. Boson lands 56.6 % of hops, so it burns coins fastest (≈ 0.26 tKAS per landed hop, estimate). Fix: size lane funding to the run (boson ≥ 800 × 16 tKAS), `POOL_LOW` phase line, value-based preflight.
+- **Fail 3 (criterion 9): mempool ≤ 5 not reachable**: desk 52–56, mini 676–726 after END, but the same levels were there before any sender started (since 23:06Z; a3–b2: 2–10). Identify those entries read-only; if foreign, the rule needs a dated change (stp's decision).
+- Shares (reported): desk 12.35 · mini 5.43 · muon 25.60 · boson 56.63 %. [ATTEMPT-a8](logs/selftest-2026-10-30/a8/ATTEMPT-a8.md)
+- **Next:** fix lane funding, settle the mempool rule, rerun the same 2-hour setup. Not launched.

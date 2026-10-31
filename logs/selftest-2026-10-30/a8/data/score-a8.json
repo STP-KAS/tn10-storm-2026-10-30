@@ -1,0 +1,70 @@
+{
+ "window_s": 7200,
+ "hops_landed_in_window": 36064,
+ "hops_backfill": 365,
+ "attributed": 36064,
+ "land_secs": 7163,
+ "land_secs_pct": 99.49,
+ "lanes": [
+  {
+   "lane": "desk",
+   "att": 137785,
+   "ok": 37529,
+   "cont": 100256,
+   "noncont": 0,
+   "landed": 4453,
+   "noncont_pct": 0,
+   "landed_share_pct": 12.3,
+   "landed_share_exact_pct": 12.347,
+   "noncont_pass": true,
+   "every_second_pass": true,
+   "share_rule": "reported_only",
+   "secs_attempting": 7200
+  },
+  {
+   "lane": "mini",
+   "att": 137580,
+   "ok": 37475,
+   "cont": 100105,
+   "noncont": 0,
+   "landed": 1958,
+   "noncont_pct": 0,
+   "landed_share_pct": 5.4,
+   "landed_share_exact_pct": 5.429,
+   "noncont_pass": true,
+   "every_second_pass": true,
+   "share_rule": "reported_only",
+   "secs_attempting": 7200
+  },
+  {
+   "lane": "muon",
+   "att": 131843,
+   "ok": 33732,
+   "cont": 98111,
+   "noncont": 0,
+   "landed": 9231,
+   "noncont_pct": 0,
+   "landed_share_pct": 25.6,
+   "landed_share_exact_pct": 25.596,
+   "noncont_pass": true,
+   "every_second_pass": true,
+   "share_rule": "reported_only",
+   "secs_attempting": 7200
+  },
+  {
+   "lane": "boson",
+   "att": 111623,
+   "ok": 30580,
+   "cont": 81043,
+   "noncont": 0,
+   "landed": 20422,
+   "noncont_pct": 0,
+   "landed_share_pct": 56.6,
+   "landed_share_exact_pct": 56.627,
+   "noncont_pass": true,
+   "every_second_pass": false,
+   "share_rule": "reported_only",
+   "secs_attempting": 7161
+  }
+ ]
+}

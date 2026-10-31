@@ -83,6 +83,8 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **A desk orchestrator that aborts leaves receiver/watch/post-end running** (port 18600 stays taken). Stop those pids before the next launch.
 - Mini runs Windows PowerShell 5: no `ConvertFrom-Json -DateKind` there (strings stay strings anyway).
 - After a desk reboot the clock fix held (`MaxAllowedPhaseOffset` 0, stripchart +0.7…+1.0 ms): no re-fix needed.
+- **Lane funding pool ran dry in the 2-hour run (a8).** Symptom: boson `pool-boson.csv` fell 400 → 0 (first 0 at 01:40:21Z), 39 seconds with no boson attempt (criteria 2 and 6 fail), throughput 5.2 → 4.4 hops/s. Cause: each landed hop uses ≈ 0.26 tKAS of lane funds (estimate) and a coin leaves the pool at ≤ 3 tKAS; boson wins ~57 % of races; the preflight checks coin **count** (≥ 200) only. Fix (open, for the rerun): size lane funds to the run (boson ≥ 800 × 16 tKAS, muon ≥ 600 × 16, ×3 for 3× rate), `POOL_LOW` phase line < 100 coins, preflight on usable value. Verify: rehearsal, then the 2-hour rerun.
+- **Mempool background above the ≤ 5 recovery rule (a8).** Desk 52–56, mini 672–741 before, during and after a8 (since 23:06Z on 30 Oct; 2–10 in a3–b2), so criterion 9 fails although the run left nothing behind. Open: identify the entries read-only (ours vs foreign); rule change is stp's decision.
 
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
@@ -95,4 +97,6 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 8. Scripts copied from the repo carry scrubbed default paths (`<desk-user>`): always pass `-Kit`, `-OldKit` and `-BuilderRoots` explicitly (a7 first desk launch had to be restarted at 17:08Z for this).
 9. START at a round minute ≥ 10 min after ready; 20 min recovery after END; scoring by a separate routine after END.
 10. After scoring: `recount.mjs` must print `RECOUNT_OK` **and `RECOUNT_MATCH`** (kit8); `score.mjs` uses `share_pass` (unrounded).
+12. Lane funds for the run length: expected landed hops per lane × ≈ 0.3 tKAS (boson wins most races); check every `pool-*.csv` stays well above 100 during the run (a8: boson ran dry after 95 min).
+13. Note both nodes' mempool before launch; criterion 9 needs ≤ 5 (a8 baseline was 52 / 673).
 11. Commit scrubbed: no keys, addresses, IPs, txids, hostnames, covenant ids, private paths or tokens.
