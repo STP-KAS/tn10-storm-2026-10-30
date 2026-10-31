@@ -1,0 +1,13 @@
+local_time_cet,machine,event
+2026-10-31 17:14:22,desk,NIC link down (e2fnexpress 27)
+2026-10-31 17:14:23,mini,internet capability lost (NCSI 4042)
+2026-10-31 17:14:36,mini,internet capability back (NCSI 4042)
+2026-10-31 17:14:38,desk,NIC link up (e2fnexpress 32)
+2026-10-31 17:16:29,desk,NIC link down
+2026-10-31 17:16:30,mini,internet capability lost
+2026-10-31 17:16:38,desk,NIC link up
+2026-10-31 17:16:40,mini,internet capability back
+2026-10-31 17:29:41,desk,NIC link down
+2026-10-31 17:29:42,mini,internet capability lost
+2026-10-31 17:29:51,desk,NIC link up
+2026-10-31 17:29:52,mini,internet capability back

@@ -134,6 +134,15 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **Lane burn with the 1 tKAS token:** usable tKAS used in 2 h: boson ≈ 24,600, muon ≈ 7,550, mini ≈ 5,600, desk ≈ 1,770. muon hit 8 coins at 13:59:39Z (18 `POOL_LOW`), mini 72. a12: `usable_min_tkas` mini 5,000 → 9,000, muon 7,000 → 11,000, boson 24,000 → 32,000 (funded to × 1.15, `fund-lanes12.mjs`, 4,403 coins of 16 tKAS).
 - Mini zip from `Compress-Archive` on Windows PowerShell 5 stores backslash paths; rename after `unzip` on the box.
 
+## 15. a12 scored (5/10, 31 Oct): home-network outages
+- **Symptom:** all 4 senders `SENDER_OFF reason=node_dead` 3 times (16:14, 16:16, 16:29Z), both nodes 0 peers and `synced=0`, DAA flat, public lanes time out (sender RPC ≈ 8 s).
+- **Cause:** local network. Desk NIC (Intel I226-V, driver 2.1.5.7) logs `e2fnexpress` 27 (link down) / 32 (link up), and the mini logs NCSI 4042 "Capability: None" in the same second. TN10 kept going (DAA caught up at ≈ 10/s). Same drops on 29 and 30 Oct (15 total).
+- **How to check (read-only):** `Get-WinEvent -FilterHashtable @{LogName='System';ProviderName='e2fnexpress';StartTime=...}` on the desk and `Microsoft-Windows-NCSI/Operational` on the mini for the run window. Put the result in the attempt as `lan-events-*.csv`.
+- **Fix:** not in our code. stp to check the shared network (router/switch/cable). Desk I226-V cards are often reported with link drops; common remedies (driver/firmware update, Energy-Efficient Ethernet off) need stp's OK since they touch his network settings. Until then, the senders' pause/resume/back-fill keeps the run going and the recount honest.
+- **Criterion 3 without the outages:** 98.66 % (a11 98.92 %). The floor stands; stp's decision.
+- **Criterion 9:** one new own tx on the mini with no live input after the outages; cannot be swept.
+- Desk also logged one `Tcpip 4266` (UDP ephemeral ports all in use) at 16:38:28Z (one a day on 29, 30, 31 Oct); 61 UDP endpoints at 18:30Z, so not a leak by our senders. Watch only.
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.
@@ -151,4 +160,5 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 11. Commit scrubbed: no keys, addresses, IPs, txids, hostnames, covenant ids, private paths or tokens.
 15. Pre-START census with `mempool-ro.mjs --save-pre` on desk and mini (a11: desk 1 / mini 2 own leftovers); the desk orchestrator must run the RBF sweep after END (`desk-a11.ps1`, `SWEEP` lines) before the END + 10 min census.
 17. Size lane funding from the last run's usable-tKAS burn × 1.3 (RUNBOOK 14), not the run before.
+18. Check both machines' network-card / NCSI events for the last hours before launch (RUNBOOK 15); if the desk link dropped, tell stp before starting.
 16. Check the mini's free memory before launch (a10: ≈ 1 GB free, kaspad 14 GB private) and tell stp if it is that low.

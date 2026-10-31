@@ -1,0 +1,248 @@
+2026-10-31T14:58:43Z WATCH node=desk pid=42728 receiver_pid=22552 post_end_pid=3864
+2026-10-31T14:58:43.3784245Z guard exit=10
+2026-10-31T14:58:43Z GUARD_PRE exit=2 refused=1
+2026-10-31T15:35:02Z HANDOFF seen_on_desk
+2026-10-31T15:35:03Z PREFLIGHT exit=0
+2026-10-31T15:35:04.0145054Z guard exit=0
+2026-10-31T15:35:04Z LAUNCH exit=0
+2026-10-31T15:45:00Z START senders=desk,mini,muon,boson families=4 rate=5
+2026-10-31T15:45:42Z TIP_BACK sender=muon family=3 from=53 to=52 why=timeouts
+2026-10-31T15:45:43Z TIP_BACK sender=mini family=3 from=53 to=52 why=timeouts
+2026-10-31T15:45:43Z TIP_BACK sender=desk family=3 from=53 to=52 why=timeouts
+2026-10-31T15:45:43Z TIP_BACK sender=boson family=3 from=53 to=52 why=timeouts
+2026-10-31T15:50:34Z TIP_BACK sender=desk family=1 from=432 to=431 why=timeouts
+2026-10-31T15:50:34Z TIP_BACK sender=mini family=1 from=432 to=431 why=timeouts
+2026-10-31T15:50:34Z TIP_BACK sender=muon family=1 from=432 to=431 why=timeouts
+2026-10-31T15:50:34Z TIP_BACK sender=boson family=1 from=432 to=431 why=timeouts
+2026-10-31T16:00:24Z TIP_BACK sender=desk family=1 from=1175 to=1174 why=timeouts
+2026-10-31T16:00:25Z TIP_BACK sender=desk family=2 from=1179 to=1178 why=timeouts
+2026-10-31T16:00:25Z TIP_BACK sender=mini family=1 from=1175 to=1174 why=timeouts
+2026-10-31T16:00:25Z TIP_BACK sender=muon family=2 from=1179 to=1178 why=timeouts
+2026-10-31T16:00:25Z TIP_BACK sender=boson family=1 from=1175 to=1174 why=timeouts
+2026-10-31T16:00:25Z TIP_BACK sender=mini family=2 from=1179 to=1178 why=timeouts
+2026-10-31T16:00:25Z TIP_BACK sender=muon family=1 from=1175 to=1174 why=timeouts
+2026-10-31T16:00:25Z TIP_BACK sender=boson family=2 from=1179 to=1178 why=timeouts
+2026-10-31T16:08:47Z TIP_BACK sender=boson family=3 from=1847 to=1846 why=timeouts
+2026-10-31T16:08:47Z TIP_BACK sender=mini family=3 from=1847 to=1846 why=timeouts
+2026-10-31T16:08:47Z TIP_BACK sender=muon family=3 from=1847 to=1846 why=timeouts
+2026-10-31T16:08:47Z TIP_BACK sender=desk family=3 from=1847 to=1846 why=timeouts
+2026-10-31T16:08:57Z TIP_BACK sender=boson family=2 from=1866 to=1865 why=timeouts
+2026-10-31T16:08:57Z TIP_BACK sender=mini family=2 from=1866 to=1865 why=timeouts
+2026-10-31T16:08:57Z TIP_BACK sender=muon family=2 from=1866 to=1865 why=timeouts
+2026-10-31T16:08:57Z TIP_BACK sender=desk family=2 from=1866 to=1865 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=muon family=2 from=2025 to=2024 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=muon family=3 from=2023 to=2022 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=mini family=4 from=2031 to=2030 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=muon family=4 from=2031 to=2030 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=boson family=1 from=2025 to=2024 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=boson family=4 from=2031 to=2030 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=muon family=1 from=2025 to=2024 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=desk family=2 from=2025 to=2024 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=desk family=3 from=2023 to=2022 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=desk family=4 from=2031 to=2030 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=desk family=1 from=2025 to=2024 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=mini family=1 from=2025 to=2024 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=mini family=2 from=2025 to=2024 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=boson family=2 from=2025 to=2024 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=mini family=3 from=2023 to=2022 why=timeouts
+2026-10-31T16:10:55Z TIP_BACK sender=boson family=3 from=2023 to=2022 why=timeouts
+2026-10-31T16:11:25Z TIP_BACK sender=mini family=2 from=2061 to=2060 why=timeouts
+2026-10-31T16:11:25Z TIP_BACK sender=boson family=1 from=2061 to=2060 why=timeouts
+2026-10-31T16:11:25Z TIP_BACK sender=mini family=1 from=2061 to=2060 why=timeouts
+2026-10-31T16:11:25Z TIP_BACK sender=muon family=1 from=2061 to=2060 why=timeouts
+2026-10-31T16:11:25Z TIP_BACK sender=boson family=2 from=2061 to=2060 why=timeouts
+2026-10-31T16:11:25Z TIP_BACK sender=muon family=2 from=2061 to=2060 why=timeouts
+2026-10-31T16:11:25Z TIP_BACK sender=desk family=1 from=2061 to=2060 why=timeouts
+2026-10-31T16:11:25Z TIP_BACK sender=desk family=2 from=2061 to=2060 why=timeouts
+2026-10-31T16:14:23Z TIP_BACK sender=desk family=3 from=2309 to=2307 why=timeouts
+2026-10-31T16:14:31Z SENDER_OFF sender=boson reason=node_dead
+2026-10-31T16:14:32Z SENDER_OFF sender=mini reason=node_dead
+2026-10-31T16:14:32Z SENDER_OFF sender=muon reason=node_dead
+2026-10-31T16:14:37Z SENDER_OFF sender=desk reason=node_dead
+2026-10-31T16:14:42Z SENDER_ON sender=boson
+2026-10-31T16:14:43Z SENDER_ON sender=muon
+2026-10-31T16:14:45Z TIP_BACK sender=boson family=3 from=2309 to=2308 why=timeouts
+2026-10-31T16:14:53Z SENDER_ON sender=mini
+2026-10-31T16:15:05Z SENDER_ON sender=desk
+2026-10-31T16:16:38Z SENDER_OFF sender=mini reason=node_dead
+2026-10-31T16:16:38Z SENDER_OFF sender=muon reason=node_dead
+2026-10-31T16:16:39Z SENDER_OFF sender=boson reason=node_dead
+2026-10-31T16:16:41Z SENDER_ON sender=boson
+2026-10-31T16:16:41Z SENDER_ON sender=muon
+2026-10-31T16:16:43Z SENDER_OFF sender=desk reason=node_dead
+2026-10-31T16:17:01Z SENDER_ON sender=mini
+2026-10-31T16:17:05Z SENDER_ON sender=desk
+2026-10-31T16:19:39Z TIP_BACK sender=desk family=1 from=2724 to=2723 why=timeouts
+2026-10-31T16:19:39Z TIP_BACK sender=desk family=4 from=2725 to=2724 why=timeouts
+2026-10-31T16:19:39Z TIP_BACK sender=mini family=1 from=2724 to=2723 why=timeouts
+2026-10-31T16:19:39Z TIP_BACK sender=mini family=4 from=2725 to=2724 why=timeouts
+2026-10-31T16:19:39Z TIP_BACK sender=boson family=4 from=2725 to=2724 why=timeouts
+2026-10-31T16:19:39Z TIP_BACK sender=muon family=1 from=2724 to=2723 why=timeouts
+2026-10-31T16:19:39Z TIP_BACK sender=boson family=1 from=2724 to=2723 why=timeouts
+2026-10-31T16:19:39Z TIP_BACK sender=muon family=4 from=2725 to=2724 why=timeouts
+2026-10-31T16:23:46Z TIP_BACK sender=mini family=3 from=3043 to=3042 why=timeouts
+2026-10-31T16:23:46Z TIP_BACK sender=desk family=3 from=3043 to=3042 why=timeouts
+2026-10-31T16:23:46Z TIP_BACK sender=muon family=3 from=3043 to=3042 why=timeouts
+2026-10-31T16:23:46Z TIP_BACK sender=boson family=3 from=3043 to=3042 why=timeouts
+2026-10-31T16:25:08Z TIP_BACK sender=boson family=1 from=3202 to=3201 why=timeouts
+2026-10-31T16:25:08Z TIP_BACK sender=mini family=1 from=3202 to=3201 why=timeouts
+2026-10-31T16:25:08Z TIP_BACK sender=desk family=1 from=3202 to=3201 why=timeouts
+2026-10-31T16:25:08Z TIP_BACK sender=muon family=1 from=3202 to=3201 why=timeouts
+2026-10-31T16:26:42Z TIP_BACK sender=desk family=3 from=3302 to=3301 why=timeouts
+2026-10-31T16:26:42Z TIP_BACK sender=muon family=3 from=3302 to=3301 why=timeouts
+2026-10-31T16:26:42Z TIP_BACK sender=boson family=3 from=3302 to=3301 why=timeouts
+2026-10-31T16:26:42Z TIP_BACK sender=mini family=3 from=3302 to=3301 why=timeouts
+2026-10-31T16:28:40Z TIP_BACK sender=desk family=3 from=3477 to=3476 why=timeouts
+2026-10-31T16:28:40Z TIP_BACK sender=mini family=3 from=3477 to=3476 why=timeouts
+2026-10-31T16:28:40Z TIP_BACK sender=mini family=2 from=3497 to=3496 why=timeouts
+2026-10-31T16:28:41Z TIP_BACK sender=desk family=2 from=3497 to=3496 why=timeouts
+2026-10-31T16:28:41Z TIP_BACK sender=muon family=2 from=3497 to=3496 why=timeouts
+2026-10-31T16:28:41Z TIP_BACK sender=muon family=3 from=3477 to=3476 why=timeouts
+2026-10-31T16:28:41Z TIP_BACK sender=boson family=3 from=3477 to=3476 why=timeouts
+2026-10-31T16:28:41Z TIP_BACK sender=boson family=2 from=3497 to=3496 why=timeouts
+2026-10-31T16:29:51Z SENDER_OFF sender=mini reason=node_dead
+2026-10-31T16:29:51Z SENDER_OFF sender=muon reason=node_dead
+2026-10-31T16:29:52Z SENDER_OFF sender=boson reason=node_dead
+2026-10-31T16:29:55Z SENDER_ON sender=boson
+2026-10-31T16:29:56Z SENDER_OFF sender=desk reason=node_dead
+2026-10-31T16:30:02Z SENDER_ON sender=muon
+2026-10-31T16:30:04Z SENDER_ON sender=mini
+2026-10-31T16:30:16Z SENDER_ON sender=desk
+2026-10-31T16:32:28Z TIP_BACK sender=boson family=1 from=3819 to=3818 why=timeouts
+2026-10-31T16:32:28Z TIP_BACK sender=boson family=2 from=3791 to=3790 why=timeouts
+2026-10-31T16:32:28Z TIP_BACK sender=desk family=1 from=3819 to=3818 why=timeouts
+2026-10-31T16:32:28Z TIP_BACK sender=muon family=1 from=3819 to=3818 why=timeouts
+2026-10-31T16:32:28Z TIP_BACK sender=desk family=2 from=3791 to=3790 why=timeouts
+2026-10-31T16:32:28Z TIP_BACK sender=mini family=2 from=3791 to=3790 why=timeouts
+2026-10-31T16:32:28Z TIP_BACK sender=muon family=2 from=3791 to=3790 why=timeouts
+2026-10-31T16:38:58Z TIP_BACK sender=desk family=3 from=4293 to=4292 why=timeouts
+2026-10-31T16:38:58Z TIP_BACK sender=mini family=3 from=4293 to=4292 why=timeouts
+2026-10-31T16:38:58Z TIP_BACK sender=boson family=3 from=4293 to=4292 why=timeouts
+2026-10-31T16:38:58Z TIP_BACK sender=muon family=3 from=4293 to=4292 why=timeouts
+2026-10-31T16:46:50Z TIP_BACK sender=desk family=1 from=4980 to=4979 why=timeouts
+2026-10-31T16:46:50Z TIP_BACK sender=muon family=1 from=4980 to=4979 why=timeouts
+2026-10-31T16:46:50Z TIP_BACK sender=boson family=1 from=4980 to=4979 why=timeouts
+2026-10-31T16:46:50Z TIP_BACK sender=mini family=1 from=4980 to=4979 why=timeouts
+2026-10-31T16:46:55Z TIP_BACK sender=muon family=3 from=4914 to=4913 why=timeouts
+2026-10-31T16:46:55Z TIP_BACK sender=desk family=3 from=4914 to=4913 why=timeouts
+2026-10-31T16:46:55Z TIP_BACK sender=boson family=3 from=4914 to=4913 why=timeouts
+2026-10-31T16:46:55Z TIP_BACK sender=mini family=3 from=4914 to=4913 why=timeouts
+2026-10-31T16:47:40Z TIP_BACK sender=mini family=3 from=4969 to=4968 why=timeouts
+2026-10-31T16:47:41Z TIP_BACK sender=desk family=3 from=4969 to=4968 why=timeouts
+2026-10-31T16:47:41Z TIP_BACK sender=boson family=3 from=4969 to=4968 why=timeouts
+2026-10-31T16:47:41Z TIP_BACK sender=muon family=3 from=4969 to=4968 why=timeouts
+2026-10-31T16:55:31Z TIP_BACK sender=muon family=4 from=5648 to=5647 why=timeouts
+2026-10-31T16:55:31Z TIP_BACK sender=boson family=4 from=5648 to=5647 why=timeouts
+2026-10-31T16:55:31Z TIP_BACK sender=desk family=4 from=5648 to=5647 why=timeouts
+2026-10-31T16:55:32Z TIP_BACK sender=mini family=4 from=5648 to=5647 why=timeouts
+2026-10-31T16:56:56Z TIP_BACK sender=muon family=1 from=5763 to=5762 why=timeouts
+2026-10-31T16:56:56Z TIP_BACK sender=desk family=1 from=5763 to=5762 why=timeouts
+2026-10-31T16:56:56Z TIP_BACK sender=boson family=1 from=5763 to=5762 why=timeouts
+2026-10-31T16:56:56Z TIP_BACK sender=mini family=1 from=5763 to=5762 why=timeouts
+2026-10-31T17:07:54Z TIP_BACK sender=muon family=1 from=6646 to=6645 why=timeouts
+2026-10-31T17:07:54Z TIP_BACK sender=desk family=1 from=6646 to=6645 why=timeouts
+2026-10-31T17:07:54Z TIP_BACK sender=boson family=1 from=6646 to=6645 why=timeouts
+2026-10-31T17:07:54Z TIP_BACK sender=mini family=1 from=6646 to=6645 why=timeouts
+2026-10-31T17:10:18Z TIP_BACK sender=mini family=1 from=6821 to=6820 why=timeouts
+2026-10-31T17:10:18Z TIP_BACK sender=desk family=1 from=6821 to=6820 why=timeouts
+2026-10-31T17:10:18Z TIP_BACK sender=boson family=1 from=6821 to=6820 why=timeouts
+2026-10-31T17:10:18Z TIP_BACK sender=muon family=1 from=6821 to=6820 why=timeouts
+2026-10-31T17:14:53Z TIP_BACK sender=muon family=3 from=7114 to=7113 why=timeouts
+2026-10-31T17:14:53Z TIP_BACK sender=mini family=3 from=7114 to=7113 why=timeouts
+2026-10-31T17:14:54Z TIP_BACK sender=desk family=3 from=7114 to=7113 why=timeouts
+2026-10-31T17:14:54Z TIP_BACK sender=boson family=3 from=7114 to=7113 why=timeouts
+2026-10-31T17:14:54Z TIP_BACK sender=muon family=4 from=7200 to=7199 why=timeouts
+2026-10-31T17:14:54Z TIP_BACK sender=boson family=4 from=7200 to=7199 why=timeouts
+2026-10-31T17:14:54Z TIP_BACK sender=mini family=4 from=7200 to=7199 why=timeouts
+2026-10-31T17:14:54Z TIP_BACK sender=desk family=4 from=7200 to=7199 why=timeouts
+2026-10-31T17:16:04Z TIP_BACK sender=boson family=2 from=7274 to=7273 why=timeouts
+2026-10-31T17:16:04Z TIP_BACK sender=boson family=4 from=7287 to=7286 why=timeouts
+2026-10-31T17:16:04Z TIP_BACK sender=mini family=2 from=7274 to=7273 why=timeouts
+2026-10-31T17:16:04Z TIP_BACK sender=muon family=4 from=7287 to=7286 why=timeouts
+2026-10-31T17:16:04Z TIP_BACK sender=desk family=2 from=7274 to=7273 why=timeouts
+2026-10-31T17:16:04Z TIP_BACK sender=desk family=4 from=7287 to=7286 why=timeouts
+2026-10-31T17:16:04Z TIP_BACK sender=muon family=2 from=7274 to=7273 why=timeouts
+2026-10-31T17:16:04Z TIP_BACK sender=mini family=4 from=7287 to=7286 why=timeouts
+2026-10-31T17:16:20Z TIP_BACK sender=muon family=3 from=7220 to=7219 why=timeouts
+2026-10-31T17:16:20Z TIP_BACK sender=boson family=3 from=7220 to=7219 why=timeouts
+2026-10-31T17:16:20Z TIP_BACK sender=desk family=3 from=7220 to=7219 why=timeouts
+2026-10-31T17:17:43Z TIP_BACK sender=muon family=1 from=7408 to=7407 why=timeouts
+2026-10-31T17:17:43Z TIP_BACK sender=boson family=1 from=7408 to=7407 why=timeouts
+2026-10-31T17:17:43Z TIP_BACK sender=desk family=1 from=7408 to=7407 why=timeouts
+2026-10-31T17:17:43Z TIP_BACK sender=mini family=1 from=7408 to=7407 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=muon family=4 from=7539 to=7538 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=muon family=3 from=7452 to=7451 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=mini family=1 from=7526 to=7525 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=desk family=4 from=7539 to=7538 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=desk family=3 from=7452 to=7451 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=mini family=4 from=7539 to=7538 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=desk family=1 from=7526 to=7525 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=boson family=3 from=7452 to=7451 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=boson family=1 from=7526 to=7525 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=muon family=1 from=7526 to=7525 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=mini family=3 from=7452 to=7451 why=timeouts
+2026-10-31T17:19:22Z TIP_BACK sender=boson family=4 from=7539 to=7538 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=muon family=3 from=8204 to=8203 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=muon family=2 from=8294 to=8293 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=mini family=2 from=8294 to=8293 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=boson family=1 from=8292 to=8290 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=desk family=2 from=8294 to=8293 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=desk family=3 from=8204 to=8203 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=desk family=1 from=8292 to=8290 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=mini family=3 from=8204 to=8203 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=mini family=1 from=8292 to=8290 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=boson family=2 from=8294 to=8293 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=muon family=1 from=8292 to=8290 why=timeouts
+2026-10-31T17:28:28Z TIP_BACK sender=boson family=3 from=8204 to=8203 why=timeouts
+2026-10-31T17:29:38Z TIP_BACK sender=mini family=2 from=8388 to=8385 why=timeouts
+2026-10-31T17:29:38Z TIP_BACK sender=desk family=4 from=8389 to=8386 why=timeouts
+2026-10-31T17:29:38Z TIP_BACK sender=boson family=2 from=8388 to=8385 why=timeouts
+2026-10-31T17:29:38Z TIP_BACK sender=mini family=4 from=8389 to=8386 why=timeouts
+2026-10-31T17:29:38Z TIP_BACK sender=muon family=2 from=8388 to=8385 why=timeouts
+2026-10-31T17:29:38Z TIP_BACK sender=desk family=2 from=8388 to=8385 why=timeouts
+2026-10-31T17:29:38Z TIP_BACK sender=boson family=4 from=8389 to=8386 why=timeouts
+2026-10-31T17:29:39Z TIP_BACK sender=muon family=4 from=8389 to=8386 why=timeouts
+2026-10-31T17:29:42Z TIP_BACK sender=mini family=3 from=8303 to=8302 why=timeouts
+2026-10-31T17:29:42Z TIP_BACK sender=boson family=3 from=8303 to=8302 why=timeouts
+2026-10-31T17:29:42Z TIP_BACK sender=muon family=3 from=8303 to=8302 why=timeouts
+2026-10-31T17:29:42Z TIP_BACK sender=desk family=3 from=8303 to=8302 why=timeouts
+2026-10-31T17:34:14Z TIP_BACK sender=muon family=3 from=8673 to=8672 why=timeouts
+2026-10-31T17:34:14Z TIP_BACK sender=desk family=3 from=8673 to=8672 why=timeouts
+2026-10-31T17:34:14Z TIP_BACK sender=boson family=3 from=8673 to=8672 why=timeouts
+2026-10-31T17:34:15Z TIP_BACK sender=mini family=3 from=8673 to=8672 why=timeouts
+2026-10-31T17:40:02Z TIP_BACK sender=desk family=1 from=9257 to=9256 why=timeouts
+2026-10-31T17:40:03Z TIP_BACK sender=muon family=1 from=9257 to=9256 why=timeouts
+2026-10-31T17:40:03Z TIP_BACK sender=boson family=1 from=9257 to=9256 why=timeouts
+2026-10-31T17:40:03Z TIP_BACK sender=mini family=1 from=9257 to=9256 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=muon family=4 from=9294 to=9293 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=mini family=1 from=9298 to=9297 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=mini family=2 from=9277 to=9276 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=muon family=2 from=9277 to=9276 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=mini family=4 from=9294 to=9293 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=boson family=2 from=9277 to=9276 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=muon family=1 from=9298 to=9297 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=desk family=4 from=9294 to=9293 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=desk family=1 from=9298 to=9297 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=desk family=2 from=9277 to=9276 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=boson family=4 from=9294 to=9293 why=timeouts
+2026-10-31T17:40:38Z TIP_BACK sender=boson family=1 from=9298 to=9297 why=timeouts
+2026-10-31T17:42:17Z TIP_BACK sender=muon family=2 from=9409 to=9408 why=timeouts
+2026-10-31T17:42:18Z TIP_BACK sender=mini family=2 from=9409 to=9408 why=timeouts
+2026-10-31T17:42:18Z TIP_BACK sender=boson family=2 from=9409 to=9408 why=timeouts
+2026-10-31T17:42:18Z TIP_BACK sender=desk family=2 from=9409 to=9408 why=timeouts
+2026-10-31T17:44:22Z TIP_BACK sender=boson family=3 from=9486 to=9485 why=timeouts
+2026-10-31T17:44:22Z TIP_BACK sender=boson family=1 from=9598 to=9597 why=timeouts
+2026-10-31T17:44:22Z TIP_BACK sender=desk family=1 from=9598 to=9597 why=timeouts
+2026-10-31T17:44:22Z TIP_BACK sender=muon family=1 from=9598 to=9597 why=timeouts
+2026-10-31T17:44:22Z TIP_BACK sender=desk family=3 from=9486 to=9485 why=timeouts
+2026-10-31T17:44:22Z TIP_BACK sender=mini family=3 from=9486 to=9485 why=timeouts
+2026-10-31T17:44:22Z TIP_BACK sender=mini family=1 from=9598 to=9597 why=timeouts
+2026-10-31T17:44:22Z TIP_BACK sender=muon family=3 from=9486 to=9485 why=timeouts
+2026-10-31T17:45:00Z END reason=window
+2026-10-31T17:45:03Z SENDERS_EXITED left=0
+2026-10-31T17:46:22Z SWEEP at=END+75s replaced=16 failed=0
+2026-10-31T17:48:06Z SWEEP at=END+180s replaced=0 failed=0
+2026-10-31T17:51:06Z SWEEP at=END+360s replaced=0 failed=0
+2026-10-31T17:55:07Z CRIT9 node=desk ours=1 ours_new=0
+2026-10-31T17:55:07Z CRIT9 node=mini ours=1 ours_new=1
+2026-10-31T18:05:14Z RECOVERY_DONE minutes=20

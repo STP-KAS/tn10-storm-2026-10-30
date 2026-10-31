@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Running status, updated with each attempt.
 
-# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · **a8 (2 h) SCORED 7/10** (5.06 hops/s, boson lane ran out of coins) · a9 9/10, **criterion 9 changed 31 Oct 07:36 CET (stp): 0 own tx at END+10 min** → a9 unconfirmed (counts not logged; 3+6 stuck own tx seen at END+75 min) · **a10 (2 h) SCORED 7/10** (5.08 hops/s; fails 3 mini node freeze, 7 desk RPC spike, 9 stuck race losers → RBF sweep fix) · **a11 (2 h) SCORED 9/10** (5.41 hops/s, best yet; only fail 3: landing 98.92 %, no freeze) · **a12 launched 16:45–18:45 CET** (same setup, lanes funded for the a11 burn)
+# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · **a8 (2 h) SCORED 7/10** (5.06 hops/s, boson lane ran out of coins) · a9 9/10, **criterion 9 changed 31 Oct 07:36 CET (stp): 0 own tx at END+10 min** → a9 unconfirmed (counts not logged; 3+6 stuck own tx seen at END+75 min) · **a10 (2 h) SCORED 7/10** (5.08 hops/s; fails 3 mini node freeze, 7 desk RPC spike, 9 stuck race losers → RBF sweep fix) · **a11 (2 h) SCORED 9/10** (5.41 hops/s, best yet; only fail 3: landing 98.92 %, no freeze) · **a12 (2 h) SCORED 5/10** (5.34 hops/s; 3 home-network outages: fails 2, 3, 5, 6; plus 9: 1 new own tx) · **a13 not launched: waiting for stp (network check, criterion 3 rule)**
 
 **[RUNBOOK](RUNBOOK.md)**: every problem a1–a7, how it was solved, and the launch checklist.
 
@@ -14,10 +14,12 @@
 | a9 (2 h) | 9/10 | 5.21 | criterion 9 (foreign mempool, old rule) |
 | a10 (2 h) | 7/10 | 5.08 | 3: mini node froze 40 s at the end (memory); 7: desk RPC 1,785 ms; 9: 22 own race losers stuck (fixed: `sweep-ours.mjs`) |
 | a11 (2 h) | **9/10** | **5.41** | 3: landing 98.92 % (78 single empty seconds, network floor; no freeze). a10 fixes all held |
+| a12 (2 h) | 5/10 | 5.34 | 3 local network outages (desk NIC link down + mini lost internet, 9–16 s each): 2, 3, 5, 6; landing 97.33 % (98.66 % outside the outages); 9: 1 new own tx with no live input |
 
 a6 (15:00–15:30Z): no freeze. 3 phantom tips, each recovered in ~5.4 s. 843 `UNACCEPT`, 0 `STALL`. Landing seconds 99.22 %, node RPC p95 4 / 2 ms. `RECOUNT_OK rows=4` (7,732 vs hop log 7,734). [ATTEMPT-a6](logs/selftest-2026-10-30/step3-base/ATTEMPT-a6.md) · [REVIEW](logs/selftest-2026-10-30/step3-base/REVIEW.md)
 
 ## Open flaws and issues
+- **Home network drops (a12, 31 Oct):** desk NIC link down 3 times in the run (16:14, 16:16, 16:29Z) and the mini lost internet in the same seconds; 15 such drops on the desk on 29–31 Oct. Cost a12 four criteria. stp to check router/switch/cable (RUNBOOK 15). [ATTEMPT-a12](logs/selftest-2026-10-30/a12/ATTEMPT-a12.md)
 - ~~**Mini memory (31 Oct, a10)**~~ fixed 31 Oct 11:10Z with stp's OK: mini kaspad restarted gracefully, `--ram-scale 0.4`, private 13.9 → 1.8 GB. See [RUNBOOK](RUNBOOK.md) 13.
 - **Stuck own txs with no live input** (1 a10 hop on both nodes, 1 a9 leftover): cannot be swept; stay until a kaspad restart. See [RUNBOOK](RUNBOOK.md) 12.
 - **Landing-seconds floor (a11, criterion 3):** 98.92 % with no freeze; empty seconds are single, evenly spread, and the next second carries extra hops (6.06 vs 5.21), so no accepting chain block took our hops in those seconds. a7–a11: 99.28 / 99.49 / 99.32 / 98.85 / 98.92 %. Rule unchanged; stp's call whether 99 % stays (see [ATTEMPT-a11](logs/selftest-2026-10-30/a11/ATTEMPT-a11.md)).
