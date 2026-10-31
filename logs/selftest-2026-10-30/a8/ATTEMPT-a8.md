@@ -35,4 +35,7 @@ Changes vs a7 (measurement only, mini side, kit8 = kit6 + 2 fixes):
 | **END** | **02:05** | **03:05** |
 | recovery + recount done | ~02:25 | ~03:25 |
 
-Mini `PREFLIGHT_GENESIS exit=0`; desk `GUARD_PRE exit=2 refused=1` (refuses before the handoff, as required). Result: see below once scored.
+Mini `PREFLIGHT_GENESIS exit=0`; desk `GUARD_PRE exit=2 refused=1` (refuses before the handoff, as required). 
+Launch lines: mini `GENESIS` f1–f4 23:56:56–59Z, `HANDOFF ok` 23:56:59Z; desk `HANDOFF seen_on_desk` 23:57:02Z, `PREFLIGHT exit=0` (desk 400 coins 21 ms, mini 399 5 ms, muon 391 200 ms, boson 400 76 ms; **clock +4.4 ms, gate=fail, pass**), guard OK, `LAUNCH exit=0`. **START 00:05:00Z** on both. First 2 min: 617 hop lines in the hop log (≈ 5.1 hops/s), 2 normal `TIP_BACK` (f1 12→11, f4 76→75), no sender `.err` output, no `PROC_EXIT`.
+
+Result: scored after END + recovery (~02:25Z).
