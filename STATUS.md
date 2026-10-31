@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Running status, updated with each attempt.
 
-# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · **a8 (2 h) SCORED 7/10** (5.06 hops/s, boson lane ran out of coins) · a9 9/10, **criterion 9 changed 31 Oct 07:36 CET (stp): 0 own tx at END+10 min** → a9 unconfirmed (counts not logged; 3+6 stuck own tx seen at END+75 min) · **a10 (2 h) SCORED 7/10** (5.08 hops/s; fails 3 mini node freeze, 7 desk RPC spike, 9 stuck race losers → RBF sweep fix) · **a11 relaunched after fixes (mini kaspad restart, 1 tKAS token): 13:00–15:00 CET**
+# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · **a8 (2 h) SCORED 7/10** (5.06 hops/s, boson lane ran out of coins) · a9 9/10, **criterion 9 changed 31 Oct 07:36 CET (stp): 0 own tx at END+10 min** → a9 unconfirmed (counts not logged; 3+6 stuck own tx seen at END+75 min) · **a10 (2 h) SCORED 7/10** (5.08 hops/s; fails 3 mini node freeze, 7 desk RPC spike, 9 stuck race losers → RBF sweep fix) · **a11 (2 h) SCORED 9/10** (5.41 hops/s, best yet; only fail 3: landing 98.92 %, no freeze) · **a12 launched 16:45–18:45 CET** (same setup, lanes funded for the a11 burn)
 
 **[RUNBOOK](RUNBOOK.md)**: every problem a1–a7, how it was solved, and the launch checklist.
 
@@ -13,13 +13,15 @@
 | a8 (2 h) | 7/10 | 5.06 | boson lane out of coins; foreign mempool |
 | a9 (2 h) | 9/10 | 5.21 | criterion 9 (foreign mempool, old rule) |
 | a10 (2 h) | 7/10 | 5.08 | 3: mini node froze 40 s at the end (memory); 7: desk RPC 1,785 ms; 9: 22 own race losers stuck (fixed: `sweep-ours.mjs`) |
+| a11 (2 h) | **9/10** | **5.41** | 3: landing 98.92 % (78 single empty seconds, network floor; no freeze). a10 fixes all held |
 
 a6 (15:00–15:30Z): no freeze. 3 phantom tips, each recovered in ~5.4 s. 843 `UNACCEPT`, 0 `STALL`. Landing seconds 99.22 %, node RPC p95 4 / 2 ms. `RECOUNT_OK rows=4` (7,732 vs hop log 7,734). [ATTEMPT-a6](logs/selftest-2026-10-30/step3-base/ATTEMPT-a6.md) · [REVIEW](logs/selftest-2026-10-30/step3-base/REVIEW.md)
 
 ## Open flaws and issues
 - ~~**Mini memory (31 Oct, a10)**~~ fixed 31 Oct 11:10Z with stp's OK: mini kaspad restarted gracefully, `--ram-scale 0.4`, private 13.9 → 1.8 GB. See [RUNBOOK](RUNBOOK.md) 13.
 - **Stuck own txs with no live input** (1 a10 hop on both nodes, 1 a9 leftover): cannot be swept; stay until a kaspad restart. See [RUNBOOK](RUNBOOK.md) 12.
-- **a11 running** (a10 setup + RBF sweep + 1 tKAS token): first slot aborted before genesis for the fixes; START 12:00Z (13:00 CET), END 14:00Z (15:00 CET), census 14:10Z (15:10 CET). [ATTEMPT-a11](logs/selftest-2026-10-30/a11/ATTEMPT-a11.md) [ATTEMPT-a10](logs/selftest-2026-10-30/a10/ATTEMPT-a10.md)
+- **Landing-seconds floor (a11, criterion 3):** 98.92 % with no freeze; empty seconds are single, evenly spread, and the next second carries extra hops (6.06 vs 5.21), so no accepting chain block took our hops in those seconds. a7–a11: 99.28 / 99.49 / 99.32 / 98.85 / 98.92 %. Rule unchanged; stp's call whether 99 % stays (see [ATTEMPT-a11](logs/selftest-2026-10-30/a11/ATTEMPT-a11.md)).
+- **Lane burn with the 1 tKAS token (a11):** muon fell to 8 coins and mini to 72 by END. a12 funding targets raised (RUNBOOK 14).
 - ~~**Desk lane share**~~ resolved by the plan 2b criteria change (18:06 CET). a7 rehearsal 16:55–17:05Z ([REHEARSAL-a7](logs/selftest-2026-10-30/step3-base/REHEARSAL-a7.md)): fire-on-new-tip makes the desk fire first (tip age p50 221 ms) and its node accepts as many submits as boson's, but only 13 % of them land vs 76 % for boson. Share **13.191 %** (< 17 % gate). The winner is set after submit by propagation to the miners, so code cannot fix it. **stp's decision (plan 2b)**: score the desk lane like the others, or keep the rule.
 - ~~**Desk clock** −146.3 ms at a6 preflight, −154.0 ms after END, −157.2 ms at 16:00Z. w32time "syncs" with time.nist.gov but does not correct the offset. The fix needs admin on the desk (the agent session is not elevated). ~~ **FIXED 30 Oct 2026, 16:45–16:47Z by stp (admin)**: NTP peer `pool.ntp.org,0x8`, manual sync, SpecialPollInterval 900, **MaxAllowedPhaseOffset 0** (the key step: Windows only steps the clock above 300 s by default), restart w32time, resync /force. Readings: −0.162 s at 16:46Z (before MaxAllowedPhaseOffset), **+0.0008 / +0.0004 / +0.0004 s at 16:47:50Z**, rehearsal preflight +2.0 ms at 16:54Z. a7 config: `clock_gate: fail`. Commands in [RUNBOOK](RUNBOOK.md) 6.5.
 - **Desk lane share** 14.973 % (rule ≥ 15 %). Boson wins 67.7 % of the races, most likely because of its network position. Planned fix: fire-on-new-tip in `sender.mjs` plus `tip_age_ms` logging, rehearsed first. If that does not lift it, the share rule is stp's decision.
@@ -87,3 +89,14 @@ Second 2-hour confirmation (03:25–05:25Z = 04:25–06:25 CET): **9/10, not pas
 - **Fail (criterion 9, strict)**: mempool desk 55–114, mini 676–726 after END vs pre-run 52 / 676 (foreign TN10 backlog). Unofficial baseline + 5: reached at 0 s on both (PASS), short foreign spikes later.
 - Shares (reported): desk 12.54 · mini 4.57 · muon 17.29 · boson 65.60 %. [ATTEMPT-a9](logs/selftest-2026-10-30/a9/ATTEMPT-a9.md)
 - **Next:** stp decides the criterion-9 rule; top up genesis keys; deploy the `clock-offset.mjs` fix; a10 = same 2-hour setup. Not launched.
+
+## a11 scored — Sat 31 Oct 2026, ~16:00 CET
+2-hour run after the a10 fixes (12:00–14:00Z = 13:00–15:00 CET): **9/10**. Scaling stays blocked.
+- **38,975 hops by recount = 5.41 hops/s** (best 2-hour rate), `RECOUNT_MATCH` 0.010 %, 0 freezes/`STALL`/`PROC_EXIT`, all lanes 7,200/7,200 s, non-contention errors ≤ 0.02 %, node RPC max 17 / 16 ms (no desk spike), mini kaspad no freeze, clocks within ±20 ms.
+- Criterion 9 PASS: 0 own tx new since START at END+10 min on both nodes (strict 1: the desk pre-START leftover with no live input). The RBF sweep replaced 13 losers at END+75 s, 0 failed.
+- **Only fail: criterion 3, landing 98.92 %** (78 empty seconds, 6 over the limit), a network floor, not a freeze. [ATTEMPT-a11](logs/selftest-2026-10-30/a11/ATTEMPT-a11.md)
+- Shares (reported): desk 4.26 · mini 12.88 · muon 17.59 · boson 65.27 %.
+
+## a12 — next 2-hour 10/10 try (launched 31 Oct 2026, 15:58 CET)
+Same setup as a11. Fix: lane funding sized to the a11 burn (`usable_min_tkas` mini 9,000, muon 11,000, boson 32,000, desk 7,000). Tag s3a12, family check 15:35Z, **START 15:45Z (16:45 CET), END 17:45Z (18:45 CET)**, census 17:55Z, recovery to 18:05Z. Scoring routine ~19:15 CET.
+- Funding 14:59–15:06Z: 111 txs, fees 1.99 tKAS → desk 808 coins / 8,056 usable, mini 918 / 10,359, muon 1,028 / 12,660, boson 3,579 / 36,807. Mini genesis keys 3 coins ≥ 15 tKAS each (`PREFLIGHT_GENESIS exit=0` 14:58Z). Desk `GUARD_PRE exit=2 refused=1` 14:58Z, clock +1.6 / +2.2 ms. Pre-START census 15:06Z: desk 1 own (the old leftover), mini 0.

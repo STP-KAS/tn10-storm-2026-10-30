@@ -1,0 +1,5 @@
+utc,server,offset_ms,rtt_ms,samples
+2026-10-31T11:22:33.371Z,pool.ntp.org,-1.5,31.0,5
+2026-10-31T11:22:33.660Z,pool.ntp.org,-1.6,31.0,5
+2026-10-31T11:50:03.309Z,pool.ntp.org,-1.1,31.0,5
+2026-10-31T14:00:03.655Z,pool.ntp.org,1.8,5.9,5

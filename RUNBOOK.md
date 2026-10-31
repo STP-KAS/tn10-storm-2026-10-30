@@ -128,6 +128,12 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **Cost:** each hop now locks 1 tKAS in the token output instead of 0.2: ≈ 5 × tKAS per hop (≈ 38 k tKAS for 2 h at 5 hops/s). Lanes topped up by usable value (`usable_min_tkas` desk 7,000 / mini 5,000 / muon 7,000 / boson 24,000, × 1.15, coins of 16 tKAS; 46 txs, fees 0.82 tKAS): preflight 11:50Z desk 783 coins / 8,055 usable, mini 594 / 6,440, muon 732 / 8,056, boson 2,335 / 27,609. Each coin still covers ≈ 12 hops before it drops under 3 tKAS.
 - **a11 relaunch:** tag s3a11b, genesis 11:49:55–11:49:58Z (4 families), handoff ok, preflight all pass (clock −0.5 ms), START **12:00Z (13:00 CET)**, END **14:00Z (15:00 CET)**, census 14:10Z.
 
+## 14. a11 scored (9/10, 31 Oct) and a12 prep
+- **a10 fixes verified:** mini kaspad restart with `--ram-scale 0.4` (no freeze over 2 h, working set 2.6–3.6 GB, private 4.1 GB 45 min after END); 1 tKAS token output (live mass ≈ 41 k, 5.41 hops/s); RBF sweep (END+75 s: desk 7 + mini 6 replaced, 0 failed; census 0 new own tx); no desk RPC spike (max 17 ms).
+- **Criterion 3 floor:** 98.92 % with no node stall. 60 of 65 gaps are single seconds; the second after a gap carries 6.06 hops vs 5.21 average, so the hops were ready but no accepting chain block took them in that second. Not fixable in our code at 4 families; the rule (99 %) is unchanged and left to stp.
+- **Lane burn with the 1 tKAS token:** usable tKAS used in 2 h: boson ≈ 24,600, muon ≈ 7,550, mini ≈ 5,600, desk ≈ 1,770. muon hit 8 coins at 13:59:39Z (18 `POOL_LOW`), mini 72. a12: `usable_min_tkas` mini 5,000 → 9,000, muon 7,000 → 11,000, boson 24,000 → 32,000 (funded to × 1.15, `fund-lanes12.mjs`, 4,403 coins of 16 tKAS).
+- Mini zip from `Compress-Archive` on Windows PowerShell 5 stores backslash paths; rename after `unzip` on the box.
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.
@@ -144,4 +150,5 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 14. Deploy the current `clock-offset.mjs` (drops zero-timestamp NTP replies) and top up the genesis keys (≥ 3 coins ≥ 15 tKAS each).
 11. Commit scrubbed: no keys, addresses, IPs, txids, hostnames, covenant ids, private paths or tokens.
 15. Pre-START census with `mempool-ro.mjs --save-pre` on desk and mini (a11: desk 1 / mini 2 own leftovers); the desk orchestrator must run the RBF sweep after END (`desk-a11.ps1`, `SWEEP` lines) before the END + 10 min census.
+17. Size lane funding from the last run's usable-tKAS burn × 1.3 (RUNBOOK 14), not the run before.
 16. Check the mini's free memory before launch (a10: ≈ 1 GB free, kaspad 14 GB private) and tell stp if it is that low.
