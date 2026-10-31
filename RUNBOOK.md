@@ -116,6 +116,18 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **`score.mjs` bug (a10 commit 3e350ba):** `const W0 = …` had ended up inside the comment on line 3, so the script could not run. Fixed (own line). Verified: a10 scored with it.
 - **Funding to usable value:** lane top-up now counts usable tKAS (Σ (coin − 3 tKAS)) to `usable_min_tkas` × 1.15 and ≥ 450 coins (a10 used ≈ 6,500 usable tKAS on boson in 2 h). a11 prep ≈ 10:25–10:33Z: desk 518 coins / 4,610 usable, mini 594 / 6,440, muon 546 / 5,638, boson 972 / 9,890 (fees 0.29 tKAS); genesis keys 4 coins ≥ 15 tKAS each.
 
+## 13. a10 fixes (31 Oct, stp 12:07 CET "Fix it. Full authority") and a11 relaunch
+- **stp override, this fix only:** restart the **mini** kaspad (not the desk). The mini stays in the test (stp).
+- **a11 first slot aborted** at 11:08–11:09Z, before its genesis (11:10Z): mini coordinator/broker/post-end and desk receiver/watch/post-end/launcher stopped; logs kept as `step3-a11-abort1` on both machines. No hop was sent.
+- **Mini kaspad restart 11:09:48–11:10:12Z.** Graceful: Ctrl+C sent to its console (`AttachConsole` + `GenerateConsoleCtrlEvent`), log `Kaspad has stopped...` after 16 s; restarted from its own start script with the same TN10 args and data dir, only `--ram-scale` 0.6 → **0.4** (supported option, `--help` checked; script backup kept). Synced again at once: 11:21Z `synced=1`, DAA mini vs desk within 21 blocks over a 2 s read gap (≈ same tip).
+- **Memory, mini (12 GB):** before kaspad private **13.91 GB** (working set 4.92 GB), free RAM 1.55–1.77 GB, free commit 1.40 GB. After: 11:20Z private 1.82 GB / free RAM 5.45 GB / free commit 8.94 GB; 11:45Z private 2.68 GB; 11:58Z 2.84 GB. Watch the growth during a11.
+- **Pagefile:** system-managed, 10.6 GB allocated, peak use 2.4 GB. Not changed: the agent session on the mini is not elevated.
+- **Side effect:** the restart emptied the mini mempool, including our stuck leftovers. Pre-START census 11:22Z: desk 82 entries / 1 ours, mini 82 / **0 ours**.
+- **Token output 0.2 → 1 tKAS.** `kcc20-reference/src/bin/kcc20/storm.rs` `TOKEN = 100_000_000` (was 20_000_000), rebuilt on the desk; the same binary replaces the mini builder (`kcc20-root`, backups `.bak-a11`; the old mini binary was byte-identical to the old desk build). The builder is untracked and stays out of git.
+- **Mass:** `tools/storm/mass-estimate.mjs` (SDK, offline) gives storage mass **50,096 → 10,130** for the hop shape (−80 %). The node reported ≈ 200 k for the old hop, so ≈ 40 k is expected on the node; checked live in a11 (see attempt log).
+- **Cost:** each hop now locks 1 tKAS in the token output instead of 0.2: ≈ 5 × tKAS per hop (≈ 38 k tKAS for 2 h at 5 hops/s). Lanes topped up by usable value (`usable_min_tkas` desk 7,000 / mini 5,000 / muon 7,000 / boson 24,000, × 1.15, coins of 16 tKAS; 46 txs, fees 0.82 tKAS): preflight 11:50Z desk 783 coins / 8,055 usable, mini 594 / 6,440, muon 732 / 8,056, boson 2,335 / 27,609. Each coin still covers ≈ 12 hops before it drops under 3 tKAS.
+- **a11 relaunch:** tag s3a11b, genesis 11:49:55–11:49:58Z (4 families), handoff ok, preflight all pass (clock −0.5 ms), START **12:00Z (13:00 CET)**, END **14:00Z (15:00 CET)**, census 14:10Z.
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.
