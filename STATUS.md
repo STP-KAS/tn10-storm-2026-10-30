@@ -68,3 +68,7 @@ stp is back from gaming and gave full control of the desk and mini. The box is n
 - **Fail 3 (criterion 9): mempool ≤ 5 not reachable**: desk 52–56, mini 676–726 after END, but the same levels were there before any sender started (since 23:06Z; a3–b2: 2–10). Identify those entries read-only; if foreign, the rule needs a dated change (stp's decision).
 - Shares (reported): desk 12.35 · mini 5.43 · muon 25.60 · boson 56.63 %. [ATTEMPT-a8](logs/selftest-2026-10-30/a8/ATTEMPT-a8.md)
 - **Next:** fix lane funding, settle the mempool rule, rerun the same 2-hour setup. Not launched.
+
+## a9 running — second 2-hour confirmation (31 Oct 2026, launched 04:07 CET)
+a8 scored 7/10 (boson pool ran dry 01:40Z; mempool rule vs a background of other TN10 traffic). Fixes: lanes funded for the window (boson 800, others 600), preflight on usable value, `POOL_LOW` alert. Mempool census: 0 of the backlog entries are ours (desk 52 stuck, mini ~700). Criterion 9 strict + unofficial baseline + 5 line.
+**START 03:25Z (04:25 CET), END 05:25Z (06:25 CET).** [ATTEMPT-a9](logs/selftest-2026-10-30/a9/ATTEMPT-a9.md)

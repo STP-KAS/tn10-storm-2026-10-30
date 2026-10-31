@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Fall-back guide for future runs.
 
-# RUNBOOK · every problem from a1 to a8 and how it was solved
+# RUNBOOK · every problem from a1 to a9 and how it was solved
 
 Each entry: **symptom → cause → fix → how it was verified → commit.** Times are UTC. Details live in the ATTEMPT files under [`logs/selftest-2026-10-30/step3-base/`](logs/selftest-2026-10-30/step3-base/).
 
@@ -86,11 +86,16 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **Lane funding pool ran dry in the 2-hour run (a8).** Symptom: boson `pool-boson.csv` fell 400 → 0 (first 0 at 01:40:21Z), 39 seconds with no boson attempt (criteria 2 and 6 fail), throughput 5.2 → 4.4 hops/s. Cause: each landed hop uses ≈ 0.26 tKAS of lane funds (estimate) and a coin leaves the pool at ≤ 3 tKAS; boson wins ~57 % of races; the preflight checks coin **count** (≥ 200) only. Fix (open, for the rerun): size lane funds to the run (boson ≥ 800 × 16 tKAS, muon ≥ 600 × 16, ×3 for 3× rate), `POOL_LOW` phase line < 100 coins, preflight on usable value. Verify: rehearsal, then the 2-hour rerun.
 - **Mempool background above the ≤ 5 recovery rule (a8).** Desk 52–56, mini 672–741 before, during and after a8 (since 23:06Z on 30 Oct; 2–10 in a3–b2), so criterion 9 fails although the run left nothing behind. Open: identify the entries read-only (ours vs foreign); rule change is stp's decision.
 
+## 9. a9 (after a8 7/10)
+- **Boson lane ran dry mid-run (a8, 01:40Z).** Cause: the lane that lands most hops pays most fees (boson ≈ 55 tKAS/min); 400 coins passed preflight by count but lasted ≈ 95 min. Fix: fund for the window (boson 800, others 600) and **preflight on usable value** (`usable_tkas` ≥ per-lane `usable_min_tkas` ≈ 2 h burn × 1.3), plus **`POOL_LOW`** alert under 100 coins.
+- **Mempool background (a8 criterion 9).** Census: desk 52, mini ~700 entries, **none ours**, stuck for the whole run. Strict rule kept; baseline + 5 reported as an unofficial line until stp decides.
+- **Treasury funding is slow** (~1.47 M mined coins, 40 s per full query, muon timed out). Use boson, query once, prepare 700-tKAS coins first, one per 40-output batch.
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.
 3. Never restart/stop/reconfigure kaspad. TN10 only.
-4. Lane keys: ≥ 400 coins of 16 tKAS (preflight floor 200). Genesis keys: ≥ 1 coin ≥ 15 tKAS each (`preflight --genesis`).
+4. Lane keys: fund for the whole window (a9: boson 800, others 600 coins of 16 tKAS); preflight checks count and usable value (`usable_min_tkas`). Genesis keys: ≥ 1 coin ≥ 15 tKAS each (`preflight --genesis`).
 5. Hosts: muon `.kaspa.blue`, boson **`.kaspa.red`**.
 6. Fresh genesis, new launch paths per run; handoff pushed to the desk receiver, sha256 checked; guard refuses before the handoff (`GUARD_PRE` non-zero) and passes after it.
 7. One builder per sender (`STORM_BUILDER_DIRECT=1`, own root), `catchup_ms: 2000`, step-back on, fire-on-tip on.

@@ -43,7 +43,10 @@ async function health() {
 setInterval(() => health().catch(() => {}), 2000);
 let cpu0 = process.cpuUsage(), cpuT = Date.now();
 setInterval(() => { try { const c = process.cpuUsage(cpu0), dt = Date.now() - cpuT; cpu0 = process.cpuUsage(); cpuT = Date.now(); fs.appendFileSync(P("logs", `proc-${LABEL}.csv`), `${iso()},${(((c.user + c.system) / 1000) / dt * 100).toFixed(1)},${(process.memoryUsage().rss / 1048576).toFixed(0)},${inflight},${B.depth ? B.depth() : 0},${catchups},${catchupTimeouts}\n`); } catch {} }, 5000);   // 30 Oct a5: cpu%, rss MB, in-flight attempts, builder queue, catch-ups
-setInterval(() => { try { fs.appendFileSync(P("logs", `pool-${LABEL}.csv`), `${iso()},${pool.coins.length}\n`); } catch {} }, 5000);   // pool size per lane
+let poolLow = false;
+setInterval(() => { try { fs.appendFileSync(P("logs", `pool-${LABEL}.csv`), `${iso()},${pool.coins.length}\n`); } catch {}
+  // 30 Oct a9: low-pool alert, once per episode (a8 boson ran dry unnoticed)
+  const n = pool.coins.length; if (pool.at && n < (CFG.pool_low ?? 100) && !poolLow) { poolLow = true; phase(`POOL_LOW sender=${LABEL} coins=${n}`); } else if (poolLow && n >= (CFG.pool_low ?? 100) + 20) { poolLow = false; phase(`POOL_OK sender=${LABEL} coins=${n}`); } }, 5000);   // pool size per lane
 
 // 30 Oct a5: one catch-up at a time per family (single-flight), capped at CATCHUP_MS. Attempts keep using the cached
 // tip while a catch-up runs (they still count as attempts and lose as contention), never pile up behind it.

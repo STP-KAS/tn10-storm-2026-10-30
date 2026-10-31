@@ -16,11 +16,14 @@ for (const [label, l] of Object.entries(process.argv.includes("--genesis") ? {} 
     const si = await to(rpc.getServerInfo(), 5000); row.synced = si.isSynced ? 1 : 0;
     const r = await to(rpc.getUtxosByAddresses({ addresses: [keyAddress(Number(l.key))] }), 15000);
     row.coins = (r.entries || []).filter((e) => !e.isCoinbase && BigInt(e.amount) > 300_000_000n).length;
-    await rpc.disconnect().catch(() => {});
-    row.pass = row.synced === 1 && row.coins >= MIN ? 1 : 0;
+    // 30 Oct a9: usable value, not just count (a8 boson: 400 coins passed, pool ran dry after 95 min: coins shrink with every hop
+    // and leave the pool at 3 tKAS). usable_tkas = sum over pool coins of (amount - 3 tKAS); must be >= usable_min_tkas (per lane or global).
+    const us = (r.entries || []).filter((e) => !e.isCoinbase && BigInt(e.amount) > 300_000_000n); row.usable_tkas = Math.round(us.reduce((a, e) => a + Number(e.amount) - 3e8, 0) / 1e8);
+    row.umin = Number(l.usable_min_tkas ?? CFG.usable_min_tkas ?? MIN * 10);
+    row.pass = row.synced === 1 && row.coins >= MIN && (row.usable_tkas ?? 0) >= row.umin ? 1 : 0;
   } catch (e) { row.err = /ENOTFOUND|dns/.test(String(e.message)) ? "dns" : /timeout/.test(String(e.message)) ? "timeout" : "rpc"; }
   if (!row.pass) bad++;
-  const line = `${new Date().toISOString()} PREFLIGHT lane=${label} dns=${row.dns} rpc_ms=${row.rpc} synced=${row.synced} coins=${row.coins} min=${MIN} pass=${row.pass}${row.err ? " err=" + row.err : ""}`;
+  const line = `${new Date().toISOString()} PREFLIGHT lane=${label} dns=${row.dns} rpc_ms=${row.rpc} synced=${row.synced} coins=${row.coins} usable_tkas=${row.usable_tkas ?? -1} usable_min=${row.umin ?? -1} min=${MIN} pass=${row.pass}${row.err ? " err=" + row.err : ""}`;
   console.log(line); fs.appendFileSync(P("logs", "preflight.log"), line + "\n");
 }
 // 30 Oct a6: genesis-key funding check (run on the main-node machine before genesis: --genesis). Every family's
