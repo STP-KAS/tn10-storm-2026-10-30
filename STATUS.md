@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Running status, updated with each attempt.
 
-# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · **a8 (2 h) SCORED 7/10** (5.06 hops/s, boson lane ran out of coins) · a9 9/10, **criterion 9 changed 31 Oct 07:36 CET (stp): 0 own tx at END+10 min** → a9 unconfirmed (counts not logged; 3+6 stuck own tx seen at END+75 min) · **a10 (2 h) 08:45–10:45 CET (first slot 08:15 aborted at preflight: boson usable value)**
+# Status · 30 Oct 2026 · a6 scored 8/10 · desk clock FIXED · share rule dropped (plan 2b, 18:06 CET) · **a7 SCORED 10/10** (5.32 hops/s) · **a8 (2 h) SCORED 7/10** (5.06 hops/s, boson lane ran out of coins) · a9 9/10, **criterion 9 changed 31 Oct 07:36 CET (stp): 0 own tx at END+10 min** → a9 unconfirmed (counts not logged; 3+6 stuck own tx seen at END+75 min) · **a10 (2 h) SCORED 7/10** (5.08 hops/s; fails 3 mini node freeze, 7 desk RPC spike, 9 stuck race losers → RBF sweep fix) · **a11 (2 h) 12:20–14:20 CET running**
 
 **[RUNBOOK](RUNBOOK.md)**: every problem a1–a7, how it was solved, and the launch checklist.
 
@@ -9,10 +9,17 @@
 | a4 | 6/10 | 4.09 | fade after 15 min (shared builder, walk pile-up) |
 | a5 | 7/10 (8/10 under the 30 Oct RPC rule, record unchanged) | 2.93 | 3 families frozen on a phantom tip one hop ahead |
 | a6 | **8/10** | **4.30** | desk clock −146 ms (needs admin); desk share 14.973 % (< 15 %, 3 hops short) |
+| a7 | **10/10** | 5.32 | — |
+| a8 (2 h) | 7/10 | 5.06 | boson lane out of coins; foreign mempool |
+| a9 (2 h) | 9/10 | 5.21 | criterion 9 (foreign mempool, old rule) |
+| a10 (2 h) | 7/10 | 5.08 | 3: mini node froze 40 s at the end (memory); 7: desk RPC 1,785 ms; 9: 22 own race losers stuck (fixed: `sweep-ours.mjs`) |
 
 a6 (15:00–15:30Z): no freeze. 3 phantom tips, each recovered in ~5.4 s. 843 `UNACCEPT`, 0 `STALL`. Landing seconds 99.22 %, node RPC p95 4 / 2 ms. `RECOUNT_OK rows=4` (7,732 vs hop log 7,734). [ATTEMPT-a6](logs/selftest-2026-10-30/step3-base/ATTEMPT-a6.md) · [REVIEW](logs/selftest-2026-10-30/step3-base/REVIEW.md)
 
 ## Open flaws and issues
+- **Mini memory (31 Oct, a10):** kaspad 14 GB private on the 12 GB mini, ≈ 1 GB free, node froze 40 s at 09:44:37Z. Needs stp (kaspad restart / reboot / RAM) — the agents may not touch kaspad.
+- **Stuck own txs with no live input** (1 a10 hop on both nodes, 1 a9 leftover): cannot be swept; stay until a kaspad restart. See [RUNBOOK](RUNBOOK.md) 12.
+- **a11 running** (same setup + RBF sweep after END): START 11:20Z (12:20 CET), END 13:20Z (14:20 CET), census 13:30Z (14:30 CET). [ATTEMPT-a10](logs/selftest-2026-10-30/a10/ATTEMPT-a10.md)
 - ~~**Desk lane share**~~ resolved by the plan 2b criteria change (18:06 CET). a7 rehearsal 16:55–17:05Z ([REHEARSAL-a7](logs/selftest-2026-10-30/step3-base/REHEARSAL-a7.md)): fire-on-new-tip makes the desk fire first (tip age p50 221 ms) and its node accepts as many submits as boson's, but only 13 % of them land vs 76 % for boson. Share **13.191 %** (< 17 % gate). The winner is set after submit by propagation to the miners, so code cannot fix it. **stp's decision (plan 2b)**: score the desk lane like the others, or keep the rule.
 - ~~**Desk clock** −146.3 ms at a6 preflight, −154.0 ms after END, −157.2 ms at 16:00Z. w32time "syncs" with time.nist.gov but does not correct the offset. The fix needs admin on the desk (the agent session is not elevated). ~~ **FIXED 30 Oct 2026, 16:45–16:47Z by stp (admin)**: NTP peer `pool.ntp.org,0x8`, manual sync, SpecialPollInterval 900, **MaxAllowedPhaseOffset 0** (the key step: Windows only steps the clock above 300 s by default), restart w32time, resync /force. Readings: −0.162 s at 16:46Z (before MaxAllowedPhaseOffset), **+0.0008 / +0.0004 / +0.0004 s at 16:47:50Z**, rehearsal preflight +2.0 ms at 16:54Z. a7 config: `clock_gate: fail`. Commands in [RUNBOOK](RUNBOOK.md) 6.5.
 - **Desk lane share** 14.973 % (rule ≥ 15 %). Boson wins 67.7 % of the races, most likely because of its network position. Planned fix: fire-on-new-tip in `sender.mjs` plus `tip_age_ms` logging, rehearsed first. If that does not lift it, the share rule is stp's decision.

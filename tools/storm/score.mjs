@@ -1,7 +1,8 @@
 // score.mjs <sub.csv: ts,sender,result,reason,txid> <hops.jsonl> <from_utc> <to_utc>
 // Scores a run against the 30 Oct criteria. Prints counts only (no txids). TESTNET-10 ONLY.
 import fs from "node:fs";
-const [sub, hopsF, from, to, censusF] = process.argv.slice(2);   // 31 Oct a10: optional 5th arg = mempool census jsonl(s), comma-separated const W0 = Date.parse(from), W1 = Date.parse(to), N = (W1 - W0) / 1000;
+const [sub, hopsF, from, to, censusF] = process.argv.slice(2);   // 31 Oct a10: optional 5th arg = mempool census jsonl(s), comma-separated
+const W0 = Date.parse(from), W1 = Date.parse(to), N = (W1 - W0) / 1000;
 const hops = new Map(); for (const l of fs.readFileSync(hopsF, "utf8").split("\n")) if (l) { const h = JSON.parse(l); hops.set(h.txid || `bf:${h.family}:${h.seq}`, h); }   // 30 Oct a8: back-filled hops have no txid
 const L = {}, attSec = {}; const landSec = new Set(); let landedWin = 0;
 for (const l of fs.readFileSync(sub, "utf8").split("\n")) { if (!l) continue; const [ts, s, res, why, txid] = l.split(","); const t = Date.parse(ts); if (t < W0 || t >= W1) continue;

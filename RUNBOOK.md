@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Fall-back guide for future runs.
 
-# RUNBOOK · every problem from a1 to a9 and how it was solved (a9 scored 9/10)
+# RUNBOOK · every problem from a1 to a10 and how it was solved (a9 9/10, a10 7/10)
 
 Each entry: **symptom → cause → fix → how it was verified → commit.** Times are UTC. Details live in the ATTEMPT files under [`logs/selftest-2026-10-30/step3-base/`](logs/selftest-2026-10-30/step3-base/).
 
@@ -106,6 +106,16 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **Coin count ≠ usable value.** a10 first slot aborted at preflight: boson had 800 coins but only 4,705 usable tKAS (< 8,600). Fix used: boson target 1,120 coins. Next: fund to `usable_min_tkas`, not a coin count.
 - `clock-offset.mjs` fix deployed (desk kit10, mini kit/kit8); check rows desk +4.6 ms, mini +23.7 ms (n=5).
 
+## 12. a10 scored (7/10, 31 Oct) — stuck own txs, node stalls, score.mjs
+- **Heavy (≈ 200 k mass) own txs = stuck race losers, not a heavy family.** Every hop of every family and lane has this shape (one path only: `sender.mjs` → `covenant.mjs buildHop` → builder `kcc20 storm hop`): 2 in (minter 10 tKAS covenant + 1 lane funding coin) → 3 out (minter 10 tKAS, KCC20 token **0.2 tKAS**, change), compute mass 9,123, **storage mass ≈ 200,000** (node; KIP-9 storage mass grows as the output value shrinks, the 0.2 tKAS token output dominates), fee 0.05 tKAS (builder fee ignores storage mass; ≈ 25 sompi/gram). So the mass is normal for our hops and is not why they stick. `mempool-diag.mjs` (read-only, no ids) on all 27 own txs at END + 10 min: none landed in the hop log; for each, another lane's hop for the same family and seq was accepted 0.17–2 s after the loser was submitted; the loser's minter input is spent by that winner, its **funding coin still unspent**. The node admitted the loser while the winning block arrived and then never evicted it; RPC-submitted txs are high-priority in the kaspad mempool and do not expire. They leave only when their funding coin is spent by a mined tx (mid-run the sender reuses the coin a few seconds later, which is why only the last minutes' losers remain at END).
+- **Fix: `tools/storm/sweep-ours.mjs`** (TN10 only, counts only). For each of our txs in the desk and mini mempools it finds a live lane funding input and submits a 1-in/1-out self-transfer of that coin back to the same key with `submitTransactionReplacement` (fee 0.06 tKAS, ≈ 30 × the loser's fee rate). The replacement evicts the loser and is mined normally. `desk-a11.ps1` runs it 3 times after END (END + 75 s, + 3 min, + 6 min; `SWEEP` phase lines, `logs/sweep.jsonl`) before the END + 10 min census. Dry run without `--apply`.
+- **Verified 31 Oct 10:24–10:25Z** on the real a10 leftovers: dry run desk 10 own (9 sweepable) / mini 17 (15); `--apply` 19 replaced, 0 failed (mini had already dropped to 12 when the desk replacements were mined); 20 s later desk 1 / mini 2 own, census `ours_new` desk 1 / mini 1, pre-START mini 1. The 3 left have **no live input**: both inputs are spent and the node still keeps them (seen for 1 a10 boson hop on both nodes and 1 a9 leftover). Nothing can replace those without a kaspad restart (not allowed); they sit in the pre-START baseline of a11. Risk for a11: a loser of this kind created during a11 would still fail criterion 9.
+- **Not changed (scaling note):** at ≈ 200 k storage mass only 2 hops fit in a 500 k-mass block; a 1 tKAS token output would cut it to ≈ 40 k (SDK estimate) and a fee that counts storage mass would rank our hops better. The token value is a constant in the untracked builder (`kcc20-reference`, `TOKEN = 20_000_000`) and would cost more tKAS per hop; decide before the 3× rate step.
+- **Mini node freeze (09:44:37–09:45:17Z, 40 s)** took 25 landing seconds (criterion 3: 98.85 %, ≈ 99.19 % without them). Cause: memory pressure on the mini (kaspad 14 GB private on a 12 GB box, commit 21/22 GB, ≈ 1 GB free, up since 23 Oct). Needs stp (kaspad restart / reboot / RAM). Possible code mitigation, not built: coordinator fail-over to the desk node or a post-END back-fill of the last minute.
+- **Desk node RPC spike 1,785 ms (09:33:22Z, DAA still 5 s)** failed criterion 7. kaspad-internal, nothing to fix on our side; watch whether it repeats.
+- **`score.mjs` bug (a10 commit 3e350ba):** `const W0 = …` had ended up inside the comment on line 3, so the script could not run. Fixed (own line). Verified: a10 scored with it.
+- **Funding to usable value:** lane top-up now counts usable tKAS (Σ (coin − 3 tKAS)) to `usable_min_tkas` × 1.15 and ≥ 450 coins (a10 used ≈ 6,500 usable tKAS on boson in 2 h). a11 prep ≈ 10:25–10:33Z: desk 518 coins / 4,610 usable, mini 594 / 6,440, muon 546 / 5,638, boson 972 / 9,890 (fees 0.29 tKAS); genesis keys 4 coins ≥ 15 tKAS each.
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.
@@ -121,3 +131,5 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 13. Note both nodes' mempool before launch; criterion 9 needs ≤ 5 (a8 baseline was 52 / 673, a9 52 / 676).
 14. Deploy the current `clock-offset.mjs` (drops zero-timestamp NTP replies) and top up the genesis keys (≥ 3 coins ≥ 15 tKAS each).
 11. Commit scrubbed: no keys, addresses, IPs, txids, hostnames, covenant ids, private paths or tokens.
+15. Pre-START census with `mempool-ro.mjs --save-pre` on desk and mini (a11: desk 1 / mini 2 own leftovers); the desk orchestrator must run the RBF sweep after END (`desk-a11.ps1`, `SWEEP` lines) before the END + 10 min census.
+16. Check the mini's free memory before launch (a10: ≈ 1 GB free, kaspad 14 GB private) and tell stp if it is that low.
