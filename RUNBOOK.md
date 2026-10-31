@@ -142,6 +142,8 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **Criterion 3 without the outages:** 98.66 % (a11 98.92 %). The floor stands; stp's decision.
 - **Criterion 9:** one new own tx on the mini with no live input after the outages; cannot be swept.
 - Desk also logged one `Tcpip 4266` (UDP ephemeral ports all in use) at 16:38:28Z (one a day on 29, 30, 31 Oct); 61 UDP endpoints at 18:30Z, so not a leak by our senders. Watch only.
+- **Desk NIC settings (31 Oct 19:55 CET, stp "Full authority"):** read without admin: `*EEE` Energy Efficient Ethernet **Off** (0), `*IdleRestriction` Disabled (0), `PnPCapabilities` unset (Windows may power the card down; default). The agent session on the desk is not elevated, so "allow the computer to turn off this device" was **not** changed; nothing else changed, no driver update. To change it, stp in an admin shell: `Set-ItemProperty <adapter class key> PnPCapabilities 24` (takes effect after a disable/enable of the card), only before a run's START.
+- **a13 pre-launch (checklist 18):** desk `e2fnexpress` 27/32 last at 16:29Z (a12), none after.
 
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
