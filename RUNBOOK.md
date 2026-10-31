@@ -1,6 +1,6 @@
 > Kaspa Testnet-10 only. Internal self-test, no Pulse. Fall-back guide for future runs.
 
-# RUNBOOK · every problem from a1 to a9 and how it was solved
+# RUNBOOK · every problem from a1 to a9 and how it was solved (a9 scored 9/10)
 
 Each entry: **symptom → cause → fix → how it was verified → commit.** Times are UTC. Details live in the ATTEMPT files under [`logs/selftest-2026-10-30/step3-base/`](logs/selftest-2026-10-30/step3-base/).
 
@@ -91,6 +91,13 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **Mempool background (a8 criterion 9).** Census: desk 52, mini ~700 entries, **none ours**, stuck for the whole run. Strict rule kept; baseline + 5 reported as an unofficial line until stp decides.
 - **Treasury funding is slow** (~1.47 M mined coins, 40 s per full query, muon timed out). Use boson, query once, prepare 700-tKAS coins first, one per 40-output batch.
 
+## 10. a9 scored (9/10, 31 Oct)
+- **Window-sized funding verified.** a9 (03:25–05:25Z): no `POOL_LOW`, lowest pools desk 435 · mini 464 · muon 297 · boson 682 (start 600/600/600/800); criteria 2 and 6 pass for 2 h, 5.0–5.26 hops/s every 10 min. Muon is the lane to watch at higher rates (−300 coins in 2 h).
+- **Bogus clock row (a9 desk 03:08:04Z, `offset_ms=-4002404878292.5`, n=1).** Cause: `clock-offset.mjs` accepted an NTP reply with zero timestamps (Kiss-o'-Death / stratum 0; the other 4 samples timed out). Not a clock step: the gate row 9 min later read +1.8 ms. Fix: replies with stratum 0 or a zero transmit time are dropped (`kod_or_zero_ts`). Verified: syntax check on the box only (UDP 123 is blocked there, see 7); deploy to the desk/mini kits and check one `clock-desk.csv` row before a10.
+- **Public-lane WebSocket drop (boson 05:08:15Z, 1.6 s, 32 `rejected rpc` = 0.02 %).** Sender kept going, landed again within 2 s, no `SENDER_OFF`. No fix needed (within the 1 % rule); keep watching.
+- **Criterion 9 still fails strictly** on the foreign backlog (desk 52, mini 676 before START; 55 / 679 at END). The run returns to baseline at 0 s (unofficial baseline + 5: PASS reached, short foreign spikes above it later in the 10 min, as before START). Open: rule decision (stp) — baseline + 5, or "0 of our txs in the mempool census at END + 10 min".
+- **Genesis keys at 1 coin ≥ 15 tKAS each after a9.** Top up before a10 (preflight `--genesis` would still pass with 1, but a relaunch would not).
+
 ## Launch checklist
 1. Admin/clock: `w32tm /stripchart … /samples:3` within ±20 ms; config `clock_gate: fail`, `clock_max_ms: 80`.
 2. Orchestrators started with **pwsh 7**, **detached** (`Start-Process`), never from an agent shell that can be cut off.
@@ -103,5 +110,6 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 9. START at a round minute ≥ 10 min after ready; 20 min recovery after END; scoring by a separate routine after END.
 10. After scoring: `recount.mjs` must print `RECOUNT_OK` **and `RECOUNT_MATCH`** (kit8); `score.mjs` uses `share_pass` (unrounded).
 12. Lane funds for the run length: expected landed hops per lane × ≈ 0.3 tKAS (boson wins most races); check every `pool-*.csv` stays well above 100 during the run (a8: boson ran dry after 95 min).
-13. Note both nodes' mempool before launch; criterion 9 needs ≤ 5 (a8 baseline was 52 / 673).
+13. Note both nodes' mempool before launch; criterion 9 needs ≤ 5 (a8 baseline was 52 / 673, a9 52 / 676).
+14. Deploy the current `clock-offset.mjs` (drops zero-timestamp NTP replies) and top up the genesis keys (≥ 3 coins ≥ 15 tKAS each).
 11. Commit scrubbed: no keys, addresses, IPs, txids, hostnames, covenant ids, private paths or tokens.

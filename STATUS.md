@@ -72,3 +72,11 @@ stp is back from gaming and gave full control of the desk and mini. The box is n
 ## a9 running — second 2-hour confirmation (31 Oct 2026, launched 04:07 CET)
 a8 scored 7/10 (boson pool ran dry 01:40Z; mempool rule vs a background of other TN10 traffic). Fixes: lanes funded for the window (boson 800, others 600), preflight on usable value, `POOL_LOW` alert. Mempool census: 0 of the backlog entries are ours (desk 52 stuck, mini ~700). Criterion 9 strict + unofficial baseline + 5 line.
 **START 03:25Z (04:25 CET), END 05:25Z (06:25 CET).** [ATTEMPT-a9](logs/selftest-2026-10-30/a9/ATTEMPT-a9.md)
+
+## a9 scored — Sat 31 Oct 2026, ~07:10 CET
+Second 2-hour confirmation (03:25–05:25Z = 04:25–06:25 CET): **9/10, not passed (criterion 9 only)**. Scaling stays blocked.
+- **37,487 hops by recount = 5.21 hops/s** (f1 9,401 · f2 9,361 · f3 9,404 · f4 9,321). **`RECOUNT_OK rows=4`, `RECOUNT_MATCH hoplog=37483 recount=37487 diff_pct=0.011`**. 0 freezes, landing 99.32 %, 0 non-contention errors except 32 boson WebSocket-drop rejects (0.02 %), node RPC p95 5 / 2 ms, clocks desk +1.8…+6.3 ms, mini +18.9 / +20.8 ms.
+- **Funding fix worked**: no `POOL_LOW`; END pools desk 537 · mini 554 · muon 353 · boson 733. Every lane attempted in all 7,200 s.
+- **Fail (criterion 9, strict)**: mempool desk 55–114, mini 676–726 after END vs pre-run 52 / 676 (foreign TN10 backlog). Unofficial baseline + 5: reached at 0 s on both (PASS), short foreign spikes later.
+- Shares (reported): desk 12.54 · mini 4.57 · muon 17.29 · boson 65.60 %. [ATTEMPT-a9](logs/selftest-2026-10-30/a9/ATTEMPT-a9.md)
+- **Next:** stp decides the criterion-9 rule; top up genesis keys; deploy the `clock-offset.mjs` fix; a10 = same 2-hour setup. Not launched.
