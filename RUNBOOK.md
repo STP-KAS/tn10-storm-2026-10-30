@@ -103,6 +103,7 @@ Verified: stripchart −0.162 s at 16:46Z (after the first three steps alone), *
 - **a9 under the new rule: unconfirmed.** a9 logged only mempool size at END + 10 min, no own-tx counts. Census at 06:38–06:41Z (73–76 min after the a9 END): **3 own tx on desk, 6 on mini, still there 30 s later** (2 in / 3 out, mass ≈ 200,000, fee 0.05 tKAS, not orphans, paying to lane keys 0/1/3). Nothing of ours was sent between END and then, so these are most likely a9 leftovers and a9 would likely **fail** the new criterion 9; they sit above the standard mass limit and are not mined. They cannot be cleared without restarting kaspad (not allowed); they stay until mempool expiry.
 - **Consequence for a10:** these 9 are pre-START own txs. Strict scoring fails a10 on them. `ours_new` (own txs created in a10) is logged so stp can decide whether pre-existing stuck txs count. Root cause (which family/hop produces ≈ 200 k-mass txs) is open.
 - **Funding scripts need `send`.** `fund-gen8.mjs` / `fund-lanes9.mjs` without `send` are a dry run (prints `outputs` only). a10 prep: genesis 4 coins each, lanes 600/600/600/800, after `send prep` then `send`.
+- **Coin count ≠ usable value.** a10 first slot aborted at preflight: boson had 800 coins but only 4,705 usable tKAS (< 8,600). Fix used: boson target 1,120 coins. Next: fund to `usable_min_tkas`, not a coin count.
 - `clock-offset.mjs` fix deployed (desk kit10, mini kit/kit8); check rows desk +4.6 ms, mini +23.7 ms (n=5).
 
 ## Launch checklist
